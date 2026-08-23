@@ -1,0 +1,9 @@
+{
+  "name": "pen-collection-backend",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@vercel/postgres": "^0.10.0",
+    "resend": "^4.0.1"
+  }
+}

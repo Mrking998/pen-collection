@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F3E9D3">
+<title>Admin — Pen Collection</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/backend.css">
+</head>
+<body>
+<div class="wrap admin-wrap">
+  <h1 style="font-family:'DM Sans',sans-serif; font-size:24px; margin-bottom:20px;">Pen Collection — Admin</h1>
+
+  <section id="admin-login" class="admin-login">
+    <form id="login-form">
+      <label for="login-password">Admin password</label>
+      <input type="password" id="login-password" required>
+      <button type="submit" class="btn btn-gold">Log In</button>
+      <p id="login-error" class="error-msg" style="color:#b33;"></p>
+    </form>
+  </section>
+
+  <section id="admin-dashboard" style="display:none;">
+    <div class="admin-header">
+      <div class="admin-tabs">
+        <button type="button" class="admin-tab active" data-tab="products">Products</button>
+        <button type="button" class="admin-tab" data-tab="orders">Orders</button>
+        <button type="button" class="admin-tab" data-tab="messages">Messages</button>
+      </div>
+      <button type="button" id="logout-btn" class="btn btn-outline">Log Out</button>
+    </div>
+
+    <div id="panel-products" class="admin-panel active">
+      <h2 id="product-form-title">Add Product</h2>
+      <form id="product-form" class="admin-form">
+        <input type="hidden" name="id">
+        <input type="text" name="name" placeholder="Product name (e.g. Navy Peplum Skirt Suit)" required>
+        <input type="text" name="color" placeholder="Color (e.g. Navy)">
+        <input type="text" name="category" placeholder="Category (e.g. Skirt suit)">
+        <textarea name="description" placeholder="Short description"></textarea>
+        <input type="number" step="0.01" name="price_naira" placeholder="Price in ₦ (e.g. 85000)" required>
+        <input type="text" name="image_url" placeholder="Image URL (e.g. assets/suit-navy-01.jpeg)">
+        <input type="text" name="sizes" placeholder="Sizes, comma separated (e.g. UK 10, UK 12, UK 14)">
+        <input type="number" name="stock_quantity" placeholder="Stock quantity" required>
+        <label class="checkbox-label"><input type="checkbox" name="is_active" checked> Visible on site</label>
+        <div class="admin-form-actions">
+          <button type="submit" class="btn btn-gold">Save Product</button>
+          <button type="button" id="product-form-reset" class="btn btn-outline">Clear / New</button>
+        </div>
+      </form>
+      <table class="admin-table">
+        <thead><tr><th>Name</th><th>Color</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="product-list"></tbody>
+      </table>
+    </div>
+
+    <div id="panel-orders" class="admin-panel">
+      <h2>Orders</h2>
+      <table class="admin-table">
+        <thead><tr><th>Reference</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="order-list"></tbody>
+      </table>
+    </div>
+
+    <div id="panel-messages" class="admin-panel">
+      <h2>Messages</h2>
+      <table class="admin-table">
+        <thead><tr><th>From</th><th>Message</th><th>Date</th><th></th></tr></thead>
+        <tbody id="message-list"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+<script src="assets/admin.js"></script>
+</body>
+</html>
