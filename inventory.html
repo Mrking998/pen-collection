@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Stock Manager — Pen Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/inventory.css">
+</head>
+<body>
+  <header class="manager-header">
+    <a class="manager-brand" href="index.html">
+      <img src="assets/logo-mark.png" alt="">
+      <span>Pen Collection</span>
+    </a>
+    <div class="header-actions">
+      <span class="save-state" id="save-state" role="status">Changes saved</span>
+      <a class="ghost-button" href="index.html#collection" target="_blank">View shop</a>
+      <button class="primary-button" type="button" data-open-product>Add new stock</button>
+    </div>
+  </header>
+
+  <main class="manager-shell">
+    <section class="manager-intro">
+      <div>
+        <p class="eyebrow">Inventory workspace</p>
+        <h1>Stock at a glance.</h1>
+        <p>Update what is available, adjust prices, and add new arrivals without touching the website layout.</p>
+      </div>
+      <div class="summary-grid" aria-label="Inventory summary">
+        <article><strong id="summary-products">0</strong><span>Products</span></article>
+        <article><strong id="summary-units">0</strong><span>Units in stock</span></article>
+        <article><strong id="summary-low">0</strong><span>Low stock</span></article>
+        <article><strong id="summary-value">₦0</strong><span>Stock value</span></article>
+      </div>
+    </section>
+
+    <section class="inventory-panel">
+      <div class="toolbar">
+        <label class="search-control">
+          <span class="sr-only">Search inventory</span>
+          <input id="inventory-search" type="search" placeholder="Search by name, colour or category">
+        </label>
+        <label class="filter-control">
+          <span>Status</span>
+          <select id="inventory-filter">
+            <option value="all">All stock</option>
+            <option value="available">Available</option>
+            <option value="low">Low stock</option>
+            <option value="sold-out">Sold out</option>
+            <option value="hidden">Hidden</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item</th><th>Price</th><th>Available</th><th>Visibility</th><th><span class="sr-only">Actions</span></th></tr></thead>
+          <tbody id="inventory-list"></tbody>
+        </table>
+        <div class="empty-state" id="empty-state" hidden>
+          <h2>No matching stock</h2>
+          <p>Try another search or add a new product.</p>
+        </div>
+      </div>
+    </section>
+
+    <p class="prototype-note">Frontend workspace preview — changes are saved on this device for now.</p>
+  </main>
+
+  <div class="modal-backdrop" id="product-modal" hidden>
+    <section class="product-modal" role="dialog" aria-modal="true" aria-labelledby="product-form-title">
+      <div class="modal-heading">
+        <div><p class="eyebrow">Product details</p><h2 id="product-form-title">Add new stock</h2></div>
+        <button class="icon-button" type="button" data-close-product aria-label="Close">×</button>
+      </div>
+      <form id="product-form">
+        <input type="hidden" name="id">
+        <div class="product-editor">
+          <div class="photo-field">
+            <input id="product-photo" name="photo" type="file" accept="image/png,image/jpeg,image/webp" class="sr-only">
+            <label for="product-photo" class="photo-drop" id="photo-drop">
+              <img id="photo-preview" alt="Product preview" hidden>
+              <span id="photo-prompt"><b>Upload product photo</b><small>JPG, PNG or WebP</small></span>
+            </label>
+            <input type="hidden" name="image">
+          </div>
+          <div class="form-fields">
+            <label class="wide"><span>Product name</span><input name="name" required placeholder="e.g. Navy Peplum Skirt Suit"></label>
+            <label><span>Colour</span><input name="color" required placeholder="Navy"></label>
+            <label><span>Category</span><select name="category" required><option value="">Choose category</option><option>Skirt suit</option><option>Pantsuit</option><option>Blazer</option><option>Belted set</option><option>Dress</option><option>Other</option></select></label>
+            <label><span>Price (₦)</span><input name="price" type="number" min="0" step="500" required placeholder="85000"></label>
+            <label><span>Quantity available</span><input name="quantity" type="number" min="0" step="1" required value="1"></label>
+            <label class="wide"><span>Sizes <small>Separate with commas</small></span><input name="sizes" placeholder="UK 10, UK 12, UK 14"></label>
+            <label class="wide"><span>Short description</span><textarea name="description" rows="3" placeholder="A short note customers will see."></textarea></label>
+            <label class="switch-row wide"><span><b>Show in the shop</b><small>Customers can see this product</small></span><input name="visible" type="checkbox" checked></label>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="danger-button" id="delete-product" type="button" hidden>Delete product</button>
+          <span class="action-spacer"></span>
+          <button class="ghost-button" type="button" data-close-product>Cancel</button>
+          <button class="primary-button" type="submit">Save product</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <script src="assets/inventory-store.js"></script>
+  <script src="assets/inventory.js"></script>
+</body>
+</html>
