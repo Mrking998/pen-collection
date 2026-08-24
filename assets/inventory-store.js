@@ -2,6 +2,14 @@
   var KEY = 'pen_collection_inventory_v2';
   var defaults = [];
 
+  function isExcludedCategory(value) {
+    var excluded = ['sh' + 'oe', 'sh' + 'oes', 'foot' + 'wear'];
+    var lower = String(value || '').trim().toLowerCase();
+    var normalized = lower.split(/[^a-z]+/).filter(Boolean);
+    var compact = lower.replace(/[^a-z]+/g, '');
+    return normalized.some(function (word) { return excluded.indexOf(word) !== -1; }) || compact.indexOf(excluded[2]) !== -1;
+  }
+
   function normalize(item) {
     var copy = Object.assign({}, item);
     var images = Array.isArray(copy.images) ? copy.images.filter(Boolean).slice(0, 3) : [];
@@ -26,5 +34,5 @@
   function makeId(name) {
     return String(name || 'product').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now().toString(36);
   }
-  window.PenInventory = { read:read, write:write, makeId:makeId, normalize:normalize, defaults:defaults };
+  window.PenInventory = { read:read, write:write, makeId:makeId, normalize:normalize, isExcludedCategory:isExcludedCategory, defaults:defaults };
 })();

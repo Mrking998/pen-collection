@@ -109,3 +109,7 @@ body{background:#fff!important;color:#000!important}
 .cart-total{font-weight:700;margin-bottom:1rem}
 .cart-footer a{display:block;text-align:center;background:var(--burgundy);color:#fff;text-decoration:none;padding:.85rem;border-radius:999px}
 .footer-hours{font-style:italic;max-width:34rem}
+body.editorial:not(.dark) .page-loader{background:#fffdf8}
+body.editorial:not(.dark) .catalog-search input,body.editorial:not(.dark) .contact-fields input,body.editorial:not(.dark) .contact-fields textarea{background:#fff;color:#211817;border-color:#d9c8bd}
+body.editorial:not(.dark) .promise{background:rgba(116,26,35,.045)}
+body.editorial:not(.dark) .cart-drawer{background:#fffdf8}

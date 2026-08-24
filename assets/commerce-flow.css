@@ -10,3 +10,6 @@
 @media(max-width:420px){.commerce-main{width:min(100% - 1.25rem,1180px)}.checkout-line{gap:.75rem;font-size:.88rem}.success-card{padding:2rem 1.15rem}.success-actions{display:grid}.success-actions a{width:100%}}
 @media(prefers-reduced-motion:reduce){.checkout-form button{transition:none}}
 @media print{.contact-float,.page-header{display:none!important}.commerce-main{padding:1rem 0}.checkout-card,.success-card{box-shadow:none}}
+body:not(.dark) .checkout-card,body:not(.dark) .success-card{background:#fff}
+body:not(.dark) .checkout-form input{background:#fff;color:#211817}
+.status-code{width:72px;height:72px;font:700 1rem var(--sans)}

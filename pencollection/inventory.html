@@ -4,11 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#fffdf8">
   <title>Stock Manager — Pen Collection</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/inventory.css"><link rel="stylesheet" href="assets/inventory-theme.css">
+  <script>try{if(localStorage.getItem('pc_theme')==='dark')document.documentElement.classList.add('inventory-dark')}catch(e){}</script>
 </head>
 <body>
   <header class="manager-header">
@@ -18,6 +20,7 @@
     </a>
     <div class="header-actions">
       <span class="save-state" id="save-state" role="status">Changes saved</span>
+      <button class="manager-theme" id="inventory-theme" type="button" aria-label="Use dark mode" title="Light mode active"><span aria-hidden="true">☀</span></button>
       <a class="ghost-button" href="index.html#collection" target="_blank">View shop</a>
       <button class="primary-button" type="button" data-open-product>Add new stock</button>
     </div>
@@ -93,7 +96,7 @@
           <div class="form-fields">
             <label class="wide"><span>Product name</span><input name="name" required placeholder="Enter the product name"></label>
             <label><span>Colour</span><input name="color" required placeholder="Navy"></label>
-            <label><span>Type / category</span><input name="category" required placeholder="Enter a category"></label>
+            <label><span>Type / category</span><input name="category" required placeholder="Enter a clothing or accessory category" aria-describedby="category-error"><small class="field-error" id="category-error"></small></label>
             <label><span>Price (₦)</span><input name="price" type="number" min="0" step="500" required placeholder="85000"></label>
             <label><span>Quantity available</span><input name="quantity" type="number" min="0" step="1" required value="1"></label>
             <label class="wide"><span>Sizes <small>Separate with commas</small></span><input name="sizes" placeholder="UK 10, UK 12, UK 14"></label>

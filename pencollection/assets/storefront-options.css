@@ -161,3 +161,15 @@ body.editorial{background-color:#fbf6ed;background-image:radial-gradient(ellipse
 .editorial main::after{top:28rem;right:-23%;width:72%;opacity:.52}
 .editorial main::before{left:-30%;width:65%}
 }
+/* Clean light canvas; burgundy watercolor remains a restrained hero accent. */
+body.editorial:not(.dark){--paper:#fffdf8;background-color:#fffdf8;background-image:none}
+body.editorial:not(.dark) .topbar{background:rgba(255,253,248,.96)}
+body.editorial:not(.dark) .site-menu{background:rgba(255,253,248,.98)}
+body.editorial:not(.dark) .hero::before{right:3%;top:4%;width:clamp(210px,30vw,430px);height:68%;background:radial-gradient(ellipse at 58% 24%,rgba(144,34,45,.2) 0 17%,rgba(184,101,91,.11) 38%,transparent 69%);opacity:.8;filter:blur(5px)}
+body.editorial:not(.dark) .hero::after{right:10%;top:39%;width:clamp(130px,17vw,240px);height:34%;background:linear-gradient(180deg,rgba(144,34,45,.1),rgba(190,115,102,.04) 70%,transparent);opacity:.7;filter:blur(10px)}
+body.editorial:not(.dark) main::after{background:linear-gradient(180deg,rgba(144,34,45,.045),rgba(190,115,102,.025) 45%,transparent);opacity:.45}
+body.editorial:not(.dark) main::before{background:radial-gradient(ellipse,rgba(144,34,45,.04),transparent 70%)}
+body.editorial:not(.dark) .product-media{background:#f7f1eb}
+body.editorial:not(.dark) .badge{background:#fffdf8}
+body.editorial:not(.dark) .shop-head p,body.editorial:not(.dark) .meta,body.editorial:not(.dark) .description{color:#625853}
+@media(max-width:700px){body.editorial:not(.dark) .hero::before{right:-16%;width:64vw;opacity:.48}body.editorial:not(.dark) .hero::after{opacity:.4}}

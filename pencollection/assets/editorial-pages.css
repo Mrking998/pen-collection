@@ -64,3 +64,7 @@ h2{font-size:clamp(1.7rem,4vw,2.7rem);margin:2.5rem 0 .7rem}
 .dark .page-main a:link{color:#efb4aa;text-decoration-color:rgba(239,180,170,.6)}
 .dark .page-main a:visited{color:#dca8bd}
 .dark .page-main a:hover,.dark .page-main a:focus-visible{color:#fff4ea;outline-color:#efb4aa}
+body:not(.dark){--paper:#fffdf8;background-color:#fffdf8;background-image:radial-gradient(ellipse at 96% 8%,rgba(144,34,45,.055),transparent 22%)}
+body:not(.dark) .page-header{background:rgba(255,253,248,.96)}
+body:not(.dark) .principles article{background:#fff}
+body:not(.dark) .contact-panel{background:#fffdf8}

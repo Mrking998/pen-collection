@@ -17,9 +17,36 @@
   var photoImages = [];
   var processingPhotos = false;
   var lastFocus = null;
+  var themeButton = document.getElementById('inventory-theme');
+
+  function syncTheme() {
+    var dark = document.documentElement.classList.contains('inventory-dark');
+    var icon = themeButton && themeButton.querySelector('span');
+    document.body.classList.toggle('dark', dark);
+    if (themeButton) {
+      themeButton.setAttribute('aria-label', dark ? 'Use light mode' : 'Use dark mode');
+      themeButton.setAttribute('title', dark ? 'Dark mode active' : 'Light mode active');
+    }
+    if (icon) icon.textContent = dark ? '☾' : '☀';
+    var themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.content = dark ? '#171514' : '#fffdf8';
+  }
+  syncTheme();
+  if (themeButton) themeButton.addEventListener('click', function () {
+    document.documentElement.classList.toggle('inventory-dark');
+    var dark = document.documentElement.classList.contains('inventory-dark');
+    try { localStorage.setItem('pc_theme', dark ? 'dark' : 'light'); } catch (error) {}
+    syncTheme();
+  });
 
   function money(value) { return '₦' + Number(value || 0).toLocaleString('en-NG'); }
   function safe(value) { return String(value == null ? '' : value).replace(/[&<>'"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]; }); }
+  function setCategoryError(message) {
+    var input = form.elements.category;
+    var error = document.getElementById('category-error');
+    input.setAttribute('aria-invalid', message ? 'true' : 'false');
+    error.textContent = message || '';
+  }
   function statusFor(item) {
     if (!item.visible) return 'hidden';
     if (item.quantity === 0) return 'sold-out';
@@ -73,6 +100,7 @@
     form.elements.sizes.value = item ? item.sizes.join(', ') : '';
     form.elements.description.value = item ? item.description : '';
     form.elements.visible.checked = item ? item.visible : true;
+    setCategoryError('');
     showPhotos(item ? (item.images && item.images.length ? item.images : item.image ? [item.image] : []) : []);
     document.getElementById('product-form-title').textContent = item ? 'Edit stock item' : 'Add new stock';
     deleteButton.hidden = !item;
@@ -148,9 +176,17 @@
     event.preventDefault();
     if (processingPhotos) { showState('Please wait for the photos to finish processing.', true); return; }
     var data = new FormData(form);
+    var category = String(data.get('category') || '').trim();
+    if (store.isExcludedCategory(category)) {
+      setCategoryError('Pen Collection currently accepts clothing and accessory categories only. Choose another category.');
+      form.elements.category.focus();
+      showState('Choose a clothing or accessory category before saving.', true);
+      return;
+    }
+    setCategoryError('');
     var record = {
       id: data.get('id') || store.makeId(data.get('name')),
-      name: data.get('name').trim(), color: data.get('color').trim(), category: data.get('category'),
+      name: data.get('name').trim(), color: data.get('color').trim(), category: category,
       price: Number(data.get('price')), quantity: Number(data.get('quantity')),
       sizes: data.get('sizes').split(',').map(function (size) { return size.trim(); }).filter(Boolean),
       description: data.get('description').trim(), images: photoImages.slice(), image: photoImages[0] || '',
@@ -161,6 +197,7 @@
     if (index === -1) items.unshift(record); else items[index] = record;
     if (save(before)) closeEditor();
   });
+  form.elements.category.addEventListener('input', function () { if (!store.isExcludedCategory(this.value)) setCategoryError(''); });
   deleteButton.addEventListener('click', function () {
     if (form.elements.id.value) { deleteConfirm.hidden = false; confirmDelete.focus(); }
   });
