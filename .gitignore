@@ -1,0 +1,31 @@
+# Local credentials and deployment metadata
+.env
+.env.*
+!.env.example
+.vercel/
+
+# Dependencies, logs, and temporary files
+node_modules/
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Local Codex/team configuration
+.agents/
+.claude/
+AGENTS.md
+
+# Unrelated project accidentally stored beside this site
+AutoCorrect2-live/
+AutoCorrect2-package.zip
+
+# Retired UI concept pages (not part of the active storefront)
+storefront-bento.html
+storefront-editorial.html
+storefront-grid.html
+ui-options.html
+pencollection/storefront-bento.html
+pencollection/storefront-editorial.html
+pencollection/storefront-grid.html
+pencollection/ui-options.html

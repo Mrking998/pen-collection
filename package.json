@@ -5,5 +5,8 @@
   "dependencies": {
     "@vercel/postgres": "^0.10.0",
     "resend": "^4.0.1"
+  },
+  "scripts": {
+    "doctor": "npx react-doctor@latest"
   }
 }

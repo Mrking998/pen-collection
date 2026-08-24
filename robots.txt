@@ -1,5 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
+Disallow: /inventory.html
+Disallow: /checkout.html
+Disallow: /order-confirmed.html
 Disallow: /thank-you.html
+Disallow: /api/
 
 Sitemap: https://www.pencollectionng.com/sitemap.xml

@@ -291,6 +291,7 @@ section{padding:140px 0;}
   box-shadow:0 4px 14px rgba(16,16,16,0.16);
 }
 .nav-fab svg{ width:18px; height:18px; display:block; }
+.nav-whatsapp-fab svg{ width:20px; height:20px; }
 .nav-fab:hover{ background:var(--gold); border-color:var(--gold); transform:translateY(-1px); box-shadow:0 8px 20px rgba(16,16,16,0.22); }
 header.site-nav.light-on-dark .nav-fab{
   background:rgba(243,233,211,0.14); border-color:rgba(243,233,211,0.55); color:#F3E9D3;
