@@ -2,7 +2,7 @@
 .commercial-header{top:0}
 .commercial-header .contact-nav{align-items:center}
 .editorial .header-wordmark{width:clamp(400px,30vw,430px);transform:translateX(-8px)}
-.editorial .header-wordmark img{filter:drop-shadow(0 4px 7px rgba(55,24,22,.14))}
+.editorial .header-wordmark .wordmark-text{font-size:5rem}
 .profile-shell{position:relative}
 .profile-popover{position:absolute;z-index:60;right:0;top:calc(100% + .7rem);width:min(290px,calc(100vw - 2rem));padding:1rem;background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 45px rgba(40,18,16,.2)}
 .profile-popover[hidden]{display:none}
@@ -38,19 +38,23 @@
 .cart-drawer{z-index:150}
 .dark .profile-popover{background:#211817}
 .dark .trust-strip span{background:#211817}
-body.dark.editorial .header-wordmark img{filter:brightness(0) invert(1) drop-shadow(0 4px 7px rgba(0,0,0,.3))}
+body.dark.editorial .header-wordmark .wordmark-text{color:#f4eadc;text-shadow:0 4px 7px rgba(0,0,0,.3)}
+body.dark.editorial .header-wordmark .wordmark-accent{color:#efb4aa}
 .dark .contact-panel{background:#211817}.dark .contact-panel a{color:#f4eadc}.dark .contact-panel a:hover,.dark .contact-panel a:focus-visible{background:rgba(244,234,220,.08)}
 @media(max-width:1000px){.editorial .products{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 .editorial .header-wordmark{width:clamp(290px,39vw,400px);transform:translateX(-7px)}
+.editorial .header-wordmark .wordmark-text{font-size:3.65rem}
 .trust-strip{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:700px){.editorial .products{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 .product-copy{min-height:210px}
 .editorial .header-wordmark{width:clamp(155px,41.25vw,270px);transform:translateX(-4px)}
+.editorial .header-wordmark .wordmark-text{font-size:3.25rem}
 }
-@media(max-width:420px){.editorial .header-wordmark{width:clamp(150px,40vw,165px);transform:translateX(-4px)}}
+@media(max-width:420px){.editorial .header-wordmark{width:clamp(150px,40vw,165px);transform:translateX(-4px)}.editorial .header-wordmark .wordmark-text{font-size:1.9rem}}
 @media(max-width:350px){.editorial .products{grid-template-columns:1fr!important}
 .editorial .header-wordmark{width:clamp(118px,38vw,126px);transform:translateX(-1px)}
+.editorial .header-wordmark .wordmark-text{font-size:1.5rem}
 }
 @media(prefers-reduced-motion:reduce){.site-menu,.menu-toggle path,.contact-panel,.contact-trigger{transition:none!important}
 }

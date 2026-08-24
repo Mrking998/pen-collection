@@ -1,55 +1,12 @@
-(function () {
-  const summaryEl = document.getElementById('checkout-summary');
-  const form = document.getElementById('checkout-form');
-  const statusEl = document.getElementById('checkout-status');
-
-  function formatNaira(kobo) {
-    return '₦' + (kobo / 100).toLocaleString('en-NG');
-  }
-
-  function renderSummary() {
-    const cart = window.PenCart.getCart();
-    if (!cart.length) {
-      summaryEl.innerHTML = '<p>Your cart is empty. <a href="index.html#collection">Browse the collection</a>.</p>';
-      form.style.display = 'none';
-      return;
-    }
-    const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    summaryEl.innerHTML =
-      cart
-        .map(
-          (i) => `
-      <div class="checkout-line">
-        <span>${i.name}${i.size ? ' — ' + i.size : ''} × ${i.quantity}</span>
-        <span>${formatNaira(i.price * i.quantity)}</span>
-      </div>`
-        )
-        .join('') + `<div class="checkout-line checkout-total"><span>Total</span><span>${formatNaira(total)}</span></div>`;
-  }
-
-  form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    statusEl.textContent = 'Processing…';
-    const cart = window.PenCart.getCart();
-    const payload = {
-      name: document.getElementById('co-name').value,
-      email: document.getElementById('co-email').value,
-      phone: document.getElementById('co-phone').value,
-      items: cart.map((i) => ({ id: i.id, size: i.size, quantity: i.quantity })),
-    };
-    try {
-      const resp = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || 'Checkout failed');
-      window.location.href = data.authorization_url;
-    } catch (err) {
-      statusEl.textContent = err.message;
-    }
-  });
-
+(function(){
+  'use strict';
+  var summary=document.getElementById('checkout-summary'),form=document.getElementById('checkout-form'),status=document.getElementById('checkout-status'),submit=document.getElementById('checkout-submit');
+  function formatNaira(kobo){return '₦'+(Number(kobo||0)/100).toLocaleString('en-NG');}
+  function textElement(tag,className,text){var element=document.createElement(tag);if(className)element.className=className;element.textContent=text;return element;}
+  function getCart(){return window.PenCart&&typeof window.PenCart.getCart==='function'?window.PenCart.getCart():[];}
+  function renderSummary(){var cart=getCart();summary.replaceChildren();if(!cart.length){var empty=textElement('div','checkout-empty',''),message=document.createElement('p'),link=document.createElement('a');message.append('Your cart is empty. ');link.href='index.html#collection';link.textContent='Browse current stock';message.append(link,'.');empty.append(message);summary.append(empty);form.hidden=true;return;}form.hidden=false;var total=0;cart.forEach(function(item){var quantity=Math.max(1,Number.parseInt(item.quantity,10)||1),line=textElement('div','checkout-line',''),name=textElement('span','',String(item.name||'Product')+(item.size?' — '+String(item.size):'')+' × '+quantity),price=Number(item.price||0)*quantity;total+=price;line.append(name,textElement('span','',formatNaira(price)));summary.append(line);});var totalLine=textElement('div','checkout-line checkout-total','');totalLine.append(textElement('span','','Total'),textElement('span','',formatNaira(total)));summary.append(totalLine);}
+  function clearErrors(){form.querySelectorAll('[aria-invalid="true"]').forEach(function(field){field.removeAttribute('aria-invalid');});form.querySelectorAll('.field-error').forEach(function(error){error.textContent='';});status.textContent='';status.className='checkout-status';}
+  function validate(){clearErrors();var valid=true,fields={name:document.getElementById('co-name'),email:document.getElementById('co-email'),phone:document.getElementById('co-phone')};function fail(key,message){valid=false;fields[key].setAttribute('aria-invalid','true');document.getElementById('co-'+key+'-error').textContent=message;}if(!fields.name.value.trim())fail('name','Please enter your full name.');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.value.trim()))fail('email','Please enter a valid email address.');if(fields.phone.value.replace(/\D/g,'').length<10)fail('phone','Please enter a valid phone number.');if(!valid){status.textContent='Please correct the highlighted details.';status.className='checkout-status error';form.querySelector('[aria-invalid="true"]').focus();}return valid;}
+  form.addEventListener('submit',async function(event){event.preventDefault();if(!validate())return;var cart=getCart();if(!cart.length){renderSummary();return;}submit.disabled=true;submit.textContent='Preparing secure payment…';status.textContent='Rechecking availability and total…';try{var response=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('co-name').value.trim(),email:document.getElementById('co-email').value.trim(),phone:document.getElementById('co-phone').value.trim(),items:cart.map(function(item){return{id:String(item.id),size:item.size?String(item.size):null,quantity:Math.max(1,Number.parseInt(item.quantity,10)||1)};})})}),data=await response.json().catch(function(){return{};});if(!response.ok)throw new Error(typeof data.error==='string'?data.error:'Checkout could not be started.');if(typeof data.authorization_url!=='string')throw new Error('Secure payment could not be opened. Please try again.');var destination=new URL(data.authorization_url);if(destination.protocol!=='https:')throw new Error('Secure payment could not be opened. Please try again.');status.textContent='Opening secure payment…';location.assign(destination.href);}catch(error){status.textContent=error&&error.message?error.message:'Checkout could not be started. Please try again.';status.className='checkout-status error';submit.disabled=false;submit.textContent='Try secure payment again';}});
   renderSummary();
 })();

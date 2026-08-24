@@ -1,4 +1,4 @@
-:root{--burgundy:#741a23;--soft-paper:#efe7da}
+:root{--burgundy:#741a23;--soft-paper:#fbf6ed}
 .topbar{position:sticky;top:0;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(14px);box-shadow:0 8px 28px transparent;transition:box-shadow .25s,background .25s}
 .topbar.is-scrolled{box-shadow:0 8px 28px rgba(48,24,20,.09)}
 .page-loader{position:fixed;inset:0;z-index:200;background:var(--paper);display:grid;place-content:center;justify-items:center;gap:1rem;transition:opacity .3s,visibility .3s}
@@ -59,7 +59,7 @@
 .cookie-banner #cookie-accept{background:#fff;color:#181714}
 body.dark{--paper:#171514;--ink:#f1e9db;--line:rgba(241,233,219,.2);background-color:#171514;background-image:radial-gradient(ellipse at 92% 8%,rgba(161,47,39,.2),transparent 24%),radial-gradient(ellipse at 12% 88%,rgba(203,132,103,.1),transparent 28%)}
 body.dark .topbar{background:rgba(23,21,20,.92)}
-body.dark .header-wordmark img,body.dark .brand-monogram img{filter:brightness(0) invert(1)}
+body.dark .brand-monogram img{filter:brightness(0) invert(1)}
 body.dark .hero small,body.dark .shop-head p,body.dark .meta,body.dark .description,body.dark .faq details p{color:#c8bfb2}
 body.dark .site-menu{background:rgba(28,24,22,.98)}
 body.dark .site-menu a{color:#f1e9db}
