@@ -37,8 +37,8 @@
 .cart-overlay{z-index:140}
 .cart-drawer{z-index:150}
 .dark .profile-popover{background:#211817}
-body.editorial:not(.dark) .profile-popover,body.editorial:not(.dark) .contact-panel{background:#fffdf8}
-body.editorial:not(.dark) .trust-strip span{background:#fffdf8}
+body.editorial:not(.dark) .profile-popover,body.editorial:not(.dark) .contact-panel{background:#FBF6ED}
+body.editorial:not(.dark) .trust-strip span{background:#FBF6ED}
 .dark .trust-strip span{background:#211817}
 body.dark.editorial .header-wordmark .wordmark-text{color:#f4eadc;text-shadow:0 4px 7px rgba(0,0,0,.3)}
 body.dark.editorial .header-wordmark .wordmark-accent{color:#efb4aa}

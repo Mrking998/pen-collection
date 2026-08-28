@@ -1,178 +1,22 @@
-(function () {
-  const CART_KEY = 'pc_cart';
-  let cartOpener = null;
-
-  function getCart() {
-    try {
-      return JSON.parse(localStorage.getItem(CART_KEY)) || [];
-    } catch {
-      return [];
-    }
-  }
-  function saveCart(cart) {
-    localStorage.setItem(CART_KEY, JSON.stringify(cart));
-    updateCartCount();
-  }
-  function addItem(item) {
-    const cart = getCart();
-    const existing = cart.find((i) => i.id === item.id && i.size === item.size);
-    if (existing) existing.quantity += 1;
-    else cart.push({ ...item, quantity: 1 });
-    saveCart(cart);
-    renderCart();
-    openCart();
-  }
-  function removeItem(id, size) {
-    saveCart(getCart().filter((i) => !(i.id === id && i.size === size)));
-    renderCart();
-  }
-  function changeQty(id, size, delta) {
-    const cart = getCart();
-    const item = cart.find((i) => i.id === id && i.size === size);
-    if (!item) return;
-    item.quantity = Math.max(1, item.quantity + delta);
-    saveCart(cart);
-    renderCart();
-  }
-  function formatNaira(kobo) {
-    return '₦' + (kobo / 100).toLocaleString('en-NG');
-  }
-
-  function updateCartCount() {
-    const count = getCart().reduce((n, i) => n + i.quantity, 0);
-    document.querySelectorAll('.cart-count').forEach((el) => {
-      el.textContent = String(count);
-      el.style.display = count > 0 ? 'flex' : 'none';
-    });
-  }
-
-  function injectCartUI() {
-    const navInner = document.querySelector('.contact-nav') || document.querySelector('.site-nav .nav-inner');
-    if (navInner && !document.querySelector('.cart-toggle')) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'contact-icon cart-toggle';
-      btn.setAttribute('aria-label', 'Open cart');
-      btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h2l2.1 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L20 8H7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.2"/><circle cx="17" cy="20" r="1.2"/></svg><span class="cart-count"></span>';
-      const profile = navInner.querySelector('[data-profile]');
-      navInner.insertBefore(btn, profile ? profile.closest('.profile-shell') || profile : navInner.querySelector('.menu-shell') || null);
-      btn.addEventListener('click', openCart);
-    }
-
-    if (!document.getElementById('cart-drawer')) {
-      const drawer = document.createElement('div');
-      drawer.id = 'cart-drawer';
-      drawer.className = 'cart-drawer';
-      drawer.setAttribute('role', 'dialog');
-      drawer.setAttribute('aria-modal', 'true');
-      drawer.setAttribute('aria-labelledby', 'cart-title');
-      drawer.setAttribute('aria-hidden', 'true');
-      drawer.innerHTML = `
-        <div class="cart-drawer-inner">
-          <div class="cart-header">
-            <h3 id="cart-title">Your Cart</h3>
-            <button type="button" class="cart-close" aria-label="Close cart">✕</button>
-          </div>
-          <div class="cart-items"></div>
-          <div class="cart-footer">
-            <div class="cart-total"></div>
-            <a class="btn btn-gold" href="checkout.html">Checkout</a>
-          </div>
-        </div>`;
-      document.body.appendChild(drawer);
-      drawer.querySelector('.cart-close').addEventListener('click', closeCart);
-    }
-    if (!document.getElementById('cart-overlay')) {
-      const overlay = document.createElement('div');
-      overlay.id = 'cart-overlay';
-      overlay.className = 'cart-overlay';
-      overlay.addEventListener('click', closeCart);
-      document.body.appendChild(overlay);
-    }
-  }
-
-  function openCart() {
-    if (window.PenContact) window.PenContact.close(false);
-    document.dispatchEvent(new CustomEvent('pc-cart-opening'));
-    cartOpener = document.activeElement;
-    const drawer = document.getElementById('cart-drawer');
-    drawer?.classList.add('open');
-    drawer?.setAttribute('aria-hidden', 'false');
-    document.getElementById('cart-overlay')?.classList.add('open');
-    renderCart();
-    drawer?.querySelector('.cart-close')?.focus();
-  }
-  function closeCart() {
-    const drawer = document.getElementById('cart-drawer');
-    const wasOpen = drawer?.classList.contains('open');
-    drawer?.classList.remove('open');
-    drawer?.setAttribute('aria-hidden', 'true');
-    document.getElementById('cart-overlay')?.classList.remove('open');
-    if (wasOpen && cartOpener && typeof cartOpener.focus === 'function') cartOpener.focus();
-  }
-
-  function renderCart() {
-    const drawer = document.getElementById('cart-drawer');
-    if (!drawer) return;
-    const cart = getCart();
-    const itemsEl = drawer.querySelector('.cart-items');
-    const totalEl = drawer.querySelector('.cart-total');
-    if (!cart.length) {
-      itemsEl.innerHTML = '<p class="cart-empty">Your cart is empty.</p>';
-      totalEl.textContent = '';
-      return;
-    }
-    itemsEl.innerHTML = cart
-      .map(
-        (i) => `
-      <div class="cart-item">
-        <div>
-          <p class="cart-item-name">${i.name}${i.size ? ' — ' + i.size : ''}</p>
-          <div class="cart-qty">
-            <button type="button" data-action="dec" data-id="${i.id}" data-size="${i.size || ''}">−</button>
-            <span>${i.quantity}</span>
-            <button type="button" data-action="inc" data-id="${i.id}" data-size="${i.size || ''}">+</button>
-          </div>
-        </div>
-        <div class="cart-item-right">
-          <p>${formatNaira(i.price * i.quantity)}</p>
-          <button type="button" class="cart-remove" data-action="remove" data-id="${i.id}" data-size="${i.size || ''}">Remove</button>
-        </div>
-      </div>`
-      )
-      .join('');
-    const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    totalEl.textContent = 'Total: ' + formatNaira(total);
-  }
-
-  document.addEventListener('click', (e) => {
-    const addBtn = e.target.closest('.add-to-cart');
-    if (addBtn) {
-      const card = addBtn.closest('.product, .tag');
-      const sizeSelect = card ? card.querySelector('.size-select') : null;
-      addItem({
-        id: addBtn.dataset.id,
-        name: addBtn.dataset.name,
-        price: parseInt(addBtn.dataset.price, 10),
-        size: sizeSelect ? sizeSelect.value : null,
-      });
-      return;
-    }
-    const qtyBtn = e.target.closest('[data-action="inc"], [data-action="dec"]');
-    if (qtyBtn) {
-      changeQty(qtyBtn.dataset.id, qtyBtn.dataset.size || null, qtyBtn.dataset.action === 'inc' ? 1 : -1);
-      return;
-    }
-    const removeBtn = e.target.closest('[data-action="remove"]');
-    if (removeBtn) removeItem(removeBtn.dataset.id, removeBtn.dataset.size || null);
-  });
-
-  injectCartUI();
-  updateCartCount();
-  document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && document.getElementById('cart-drawer')?.classList.contains('open')) closeCart(); });
-  document.addEventListener('pc-contact-opening', closeCart);
-  document.addEventListener('pc-profile-opening', closeCart);
-  document.addEventListener('pc-menu-opening', closeCart);
-
-  window.PenCart = { getCart, saveCart, clearCart: () => saveCart([]) };
+(function(){'use strict';
+var KEY='pc_cart',VERSION=2,opener=null,previousOverflow='',pendingNotice='';
+function clean(raw){if(!Array.isArray(raw))return[];return raw.map(function(i){return{id:String(i.id||''),name:String(i.name||'Product'),category:i.category?String(i.category):'',color:i.color?String(i.color):'',price:Math.max(0,Number(i.price)||0),size:i.size?String(i.size):null,quantity:Math.max(1,Number.parseInt(i.quantity,10)||1),maxStock:Math.max(1,Number.parseInt(i.maxStock,10)||99)};}).filter(function(i){return i.id;});}
+function getCart(){try{var stored=JSON.parse(localStorage.getItem(KEY));return clean(Array.isArray(stored)?stored:(stored&&stored.items)||[]);}catch(e){return[];}}
+function saveCart(cart){localStorage.setItem(KEY,JSON.stringify({version:VERSION,savedAt:new Date().toISOString(),items:clean(cart)}));updateCount();}
+function addItem(item){var cart=getCart(),existing=cart.find(function(i){return i.id===item.id&&i.size===item.size;});if(existing)existing.quantity=Math.min(existing.maxStock,existing.quantity+1);else cart.push({id:item.id,name:item.name,category:item.category,color:item.color,price:item.price,size:item.size,quantity:1,maxStock:item.maxStock});saveCart(cart);render();open();}
+function removeItem(id,size){saveCart(getCart().filter(function(i){return!(i.id===id&&i.size===size);}));render();}
+function changeQty(id,size,delta){var cart=getCart(),item=cart.find(function(i){return i.id===id&&i.size===size;});if(!item)return;item.quantity=Math.max(1,Math.min(item.maxStock,item.quantity+delta));saveCart(cart);render();}
+function money(kobo){return'₦'+(kobo/100).toLocaleString('en-NG');}
+function updateCount(){var n=getCart().reduce(function(total,i){return total+i.quantity;},0);document.querySelectorAll('.cart-count').forEach(function(el){el.textContent=String(n);el.style.display=n?'flex':'none';});}
+function button(label,action,item){var b=document.createElement('button');b.type='button';b.textContent=label;b.dataset.action=action;b.dataset.id=item.id;b.dataset.size=item.size||'';return b;}
+function inject(){if(document.body.classList.contains('checkout-page')||/\/checkout\.html$/i.test(location.pathname))return;var nav=document.querySelector('.contact-nav')||document.querySelector('.site-nav .nav-inner');if(nav&&!document.querySelector('.cart-toggle')){var b=document.createElement('button');b.type='button';b.className='contact-icon cart-toggle';b.setAttribute('aria-label','Open cart');b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h2l2.1 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L20 8H7" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="10" cy="20" r="1.2"/><circle cx="17" cy="20" r="1.2"/></svg><span class="cart-count"></span>';nav.insertBefore(b,nav.querySelector('.profile-shell,.menu-shell'));b.addEventListener('click',open);}
+if(!document.getElementById('cart-drawer')){var drawer=document.createElement('div');drawer.id='cart-drawer';drawer.className='cart-drawer';drawer.setAttribute('role','dialog');drawer.setAttribute('aria-modal','true');drawer.setAttribute('aria-labelledby','cart-title');drawer.setAttribute('aria-hidden','true');drawer.innerHTML='<div class="cart-drawer-inner"><div class="cart-header"><h3 id="cart-title">Your cart</h3><button type="button" class="cart-close" aria-label="Close cart">✕</button></div><p class="cart-notice" role="status" aria-live="polite" hidden></p><div class="cart-items"></div><div class="cart-footer"><div class="cart-total"></div><a class="btn btn-gold" href="checkout.html">Review order</a></div></div>';document.body.append(drawer);drawer.querySelector('.cart-close').addEventListener('click',close);}
+if(!document.getElementById('cart-overlay')){var overlay=document.createElement('div');overlay.id='cart-overlay';overlay.className='cart-overlay';overlay.addEventListener('click',close);document.body.append(overlay);}}
+function open(){var drawer=document.getElementById('cart-drawer');if(!drawer)return;if(window.PenContact)window.PenContact.close(false);document.dispatchEvent(new CustomEvent('pc-cart-opening'));opener=document.activeElement;previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';drawer.classList.add('open');drawer.setAttribute('aria-hidden','false');document.getElementById('cart-overlay').classList.add('open');render();drawer.querySelector('.cart-close').focus();}
+function close(){var drawer=document.getElementById('cart-drawer');if(!drawer||!drawer.classList.contains('open'))return;drawer.classList.remove('open');drawer.setAttribute('aria-hidden','true');document.getElementById('cart-overlay').classList.remove('open');document.body.style.overflow=previousOverflow;if(opener&&opener.focus)opener.focus();}
+function render(){var drawer=document.getElementById('cart-drawer');if(!drawer)return;var cart=getCart(),host=drawer.querySelector('.cart-items'),total=drawer.querySelector('.cart-total'),notice=drawer.querySelector('.cart-notice');notice.textContent=pendingNotice;notice.hidden=!pendingNotice;host.replaceChildren();if(!cart.length){var empty=document.createElement('p');empty.className='cart-empty';empty.textContent='Your cart is empty.';host.append(empty);total.textContent='';return;}cart.forEach(function(i){var row=document.createElement('div'),left=document.createElement('div'),name=document.createElement('p'),qty=document.createElement('div'),number=document.createElement('span'),right=document.createElement('div'),price=document.createElement('p'),remove=button('Remove','remove',i);row.className='cart-item';name.className='cart-item-name';name.textContent=i.name+(i.size?' — '+i.size:'');qty.className='cart-qty';number.textContent=String(i.quantity);var dec=button('−','dec',i),inc=button('+','inc',i);dec.setAttribute('aria-label','Decrease '+i.name+' quantity');inc.setAttribute('aria-label','Increase '+i.name+' quantity');inc.disabled=i.quantity>=i.maxStock;qty.append(dec,number,inc);left.append(name,qty);right.className='cart-item-right';price.textContent=money(i.price*i.quantity);remove.className='cart-remove';right.append(price,remove);row.append(left,right);host.append(row);});total.textContent='Estimated total: '+money(cart.reduce(function(sum,i){return sum+i.price*i.quantity;},0));}
+function reconcile(products){var cart=getCart(),byId=new Map(products.map(function(p){return[String(p.id),p];})),changes=[];var next=cart.reduce(function(items,item){var product=byId.get(item.id),stock=product&&Math.max(0,Number(product.quantity)||0);if(!product||stock<1){changes.push(item.name+' was removed because it is no longer available.');return items;}var updated=Object.assign({},item,{name:String(product.name||item.name),category:String(product.category||''),color:String(product.color||''),price:Math.round(Number(product.price||0)*100),maxStock:stock});if(updated.quantity>stock){updated.quantity=stock;changes.push(updated.name+' quantity was adjusted to '+stock+'.');}if(updated.price!==item.price)changes.push(updated.name+' price was refreshed.');items.push(updated);return items;},[]);if(changes.length){pendingNotice=changes.join(' ');saveCart(next);render();}return changes;}
+document.addEventListener('click',function(e){var add=e.target.closest('.add-to-cart');if(add){var card=add.closest('.product,.tag'),select=card&&card.querySelector('.size-select');addItem({id:String(add.dataset.id),name:String(add.dataset.name),category:String(add.dataset.category||''),color:String(add.dataset.color||''),price:Number.parseInt(add.dataset.price,10)||0,size:select?select.value:null,maxStock:Math.max(1,Number.parseInt(add.dataset.stock,10)||99)});return;}var action=e.target.closest('[data-action]');if(!action)return;if(action.dataset.action==='remove')removeItem(action.dataset.id,action.dataset.size||null);else changeQty(action.dataset.id,action.dataset.size||null,action.dataset.action==='inc'?1:-1);});
+document.addEventListener('keydown',function(e){var drawer=document.getElementById('cart-drawer');if(!drawer||!drawer.classList.contains('open'))return;if(e.key==='Escape'){e.preventDefault();close();return;}if(e.key==='Tab'){var focusable=Array.from(drawer.querySelectorAll('button:not([disabled]),a[href],select,input')).filter(function(el){return!el.hidden;});if(!focusable.length)return;var first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
+inject();updateCount();document.addEventListener('pc-contact-opening',close);document.addEventListener('pc-profile-opening',close);document.addEventListener('pc-menu-opening',close);window.PenCart={getCart:getCart,saveCart:saveCart,reconcile:reconcile,getNotice:function(){return pendingNotice;},clearCart:function(){saveCart([]);}};
 })();

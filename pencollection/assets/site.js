@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       var text = 'Hello Pen Collection, my name is ' + name.value.trim() +
         '. ' + message.value.trim() + ' (Phone: ' + phone.value.trim() + ')';
-      var waUrl = 'https://wa.me/2348930790672?text=' + encodeURIComponent(text);
+      var waUrl = 'https://wa.me/2348030790672?text=' + encodeURIComponent(text);
 
       window.open(waUrl, '_blank', 'noopener');
       window.location.href = 'thank-you.html';

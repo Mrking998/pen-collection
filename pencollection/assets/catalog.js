@@ -35,7 +35,7 @@
         '<div class="public-card-body"><div class="public-card-meta">' + safe(product.color) + ' · ' + safe(product.category) + '</div>' +
         '<h2>' + safe(product.name) + '</h2><p class="public-description">' + safe(product.description) + '</p>' + sizes +
         '<div class="public-card-footer"><span class="public-price">' + money(product.price) + '</span>' +
-        '<a class="public-enquire' + (soldOut ? ' disabled' : '') + '" href="https://wa.me/2348930790672?text=' + message + '" target="_blank" rel="noopener">' + (soldOut ? 'Unavailable' : 'Enquire') + '</a></div></div></article>';
+        '<a class="public-enquire' + (soldOut ? ' disabled' : '') + '" href="https://wa.me/2348030790672?text=' + message + '" target="_blank" rel="noopener">' + (soldOut ? 'Unavailable' : 'Enquire') + '</a></div></div></article>';
     }).join('');
   }
 

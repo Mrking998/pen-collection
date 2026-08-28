@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#fffdf8">
+<meta name="theme-color" content="#FBF6ED">
 <meta name="robots" content="noindex,follow">
 <title>Guest Checkout | Pen Collection</title>
-<meta name="description" content="Review your Pen Collection cart and continue to secure guest checkout.">
+<meta name="description" content="Review your Pen Collection cart and send a prepared order request through WhatsApp.">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="favicon-32.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,30 +15,38 @@
 <link rel="stylesheet" href="assets/editorial-pages.css">
 <link rel="stylesheet" href="assets/commerce-flow.css">
 </head>
-<body>
+<body class="checkout-page">
 <a class="skip" href="#main">Skip to content</a>
 <header class="page-header">
-  <a class="page-pc" href="index.html" aria-label="Pen Collection home"><img src="assets/logo-pc.png" alt=""></a>
+  <a class="page-pc" href="index.html" aria-label="Pen Collection home"><img src="assets/pen-collection-mark-transparent.png" alt="" width="685" height="702"></a>
   <a class="page-wordmark" href="index.html" aria-label="Pen Collection home"><span class="wordmark-text">Pen <span class="wordmark-accent">C</span>ollection</span></a>
   <nav class="page-nav" aria-label="Quick actions"><a href="index.html#collection" aria-label="Shop current stock">Shop</a><button id="page-theme" type="button" aria-label="Use dark mode">☀</button></nav>
 </header>
 <main class="commerce-main" id="main">
   <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a> / <a href="index.html#collection">Cart</a> / <span aria-current="page">Checkout</span></nav>
-  <div class="commerce-heading"><p class="eyebrow">Guest checkout</p><h1>Review and continue.</h1><p>No customer account is required. Confirm your cart and enter the details needed to begin secure payment.</p></div>
+  <div class="commerce-heading"><p class="eyebrow">Guest checkout</p><h1>Review and continue.</h1><p>No account is required. Review your selections, choose an order line and continue to WhatsApp for availability, delivery and payment confirmation.</p></div>
   <div class="checkout-layout">
     <section class="checkout-card" aria-labelledby="cart-heading">
       <h2 id="cart-heading">Your cart</h2>
       <div id="checkout-summary" class="checkout-summary" aria-live="polite"><p>Loading your cart…</p></div>
     </section>
     <section class="checkout-card" aria-labelledby="details-heading">
-      <h2 id="details-heading">Your details</h2>
+      <h2 id="details-heading">Continue on WhatsApp</h2>
       <form id="checkout-form" class="checkout-form" novalidate>
-        <label for="co-name">Full name</label><input type="text" id="co-name" name="name" autocomplete="name" required aria-describedby="co-name-error"><small class="field-error" id="co-name-error"></small>
-        <label for="co-email">Email</label><input type="email" id="co-email" name="email" autocomplete="email" required aria-describedby="co-email-error"><small class="field-error" id="co-email-error"></small>
-        <label for="co-phone">Phone</label><input type="tel" id="co-phone" name="phone" autocomplete="tel" placeholder="080X XXX XXXX" required aria-describedby="co-phone-error"><small class="field-error" id="co-phone-error"></small>
-        <button type="submit" id="checkout-submit">Continue to secure payment</button>
+        <fieldset class="order-lines" aria-describedby="line-help line-error">
+          <legend>Choose a WhatsApp order line</legend>
+          <p id="line-help">Your prepared order will open in the selected chat. You will review it before sending.</p>
+          <label class="order-line"><input type="radio" name="order-line" value="2348030790672"><span><strong>Order line 1</strong><small>08030790672</small></span></label>
+          <label class="order-line"><input type="radio" name="order-line" value="2348056232268"><span><strong>Order line 2</strong><small>08056232268</small></span></label>
+          <small class="field-error" id="line-error"></small>
+        </fieldset>
+        <label for="order-preview">Prepared order message</label>
+        <textarea id="order-preview" rows="14" readonly aria-describedby="preview-help"></textarea>
+        <p id="preview-help" class="form-note">No name, address, payment information or private profile is stored by this checkout. Share delivery details directly in WhatsApp.</p>
+        <button class="secondary-action" type="button" id="copy-order">Copy order message</button>
+        <button type="submit" id="checkout-submit">Continue to WhatsApp</button>
         <p id="checkout-status" class="checkout-status" role="status" aria-live="polite"></p>
-        <p class="form-note">By continuing, you agree to our <a href="terms-of-service.html">Terms of Service</a> and acknowledge our <a href="privacy-policy.html">Privacy Policy</a>. Availability and the payable total are rechecked by the server before payment begins.</p>
+        <p class="form-note">Displayed prices form an estimated total. Pen Collection will confirm availability, delivery charges, the final total and payment instructions in WhatsApp. Your cart remains stored only in this browser.</p>
       </form>
     </section>
   </div>
