@@ -180,6 +180,7 @@ body.editorial:not(.dark) .badge{background:#FBF6ED}
 body.editorial:not(.dark) .shop-head p,body.editorial:not(.dark) .meta,body.editorial:not(.dark) .description{color:#625853}
 @media(max-width:700px){body.editorial:not(.dark) .hero::before{right:-16%;width:64vw;opacity:.48}body.editorial:not(.dark) .hero::after{opacity:.4}}
 /* Keep the approved cream canvas and watercolor petals equally legible in light mode. */
+html{color-scheme:only light}
 body.editorial:not(.dark){--paper:#FBF6ED;background-color:#FBF6ED!important}
 body.editorial:not(.dark) .hero::before{background:radial-gradient(ellipse at 58% 24%,rgba(144,34,45,.34) 0 17%,rgba(184,101,91,.2) 38%,transparent 69%);opacity:.9;filter:blur(3px)}
 body.editorial:not(.dark) .hero::after{background:linear-gradient(180deg,rgba(144,34,45,.2),rgba(190,115,102,.09) 70%,transparent);opacity:.78;filter:blur(7px)}

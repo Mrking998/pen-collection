@@ -261,7 +261,7 @@ body{background:#FBF6ED;color:#211817}
 .admin-image-field input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}.admin-image-field input:disabled{cursor:not-allowed}
 .image-picker-plus{width:48px;height:48px;display:grid;place-items:center;border-radius:50%;background:#741a23;color:#fff;font-size:2rem;line-height:1}
 .admin-image-field strong{font-size:1rem}.admin-image-field>span:not(.image-picker-plus){font-size:.8rem;color:#6d625c}
-.admin-image-previews{display:grid;grid-template-columns:repeat(3,minmax(0,150px));gap:10px}
+.admin-image-previews{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
 .admin-image-previews figure{position:relative;margin:0;aspect-ratio:1;border-radius:14px;overflow:hidden;background:#efe7da;border:1px solid var(--line)}
 .admin-image-previews img{width:100%;height:100%;object-fit:cover}.admin-image-previews figcaption{position:absolute;left:7px;bottom:7px;padding:.25rem .45rem;border-radius:999px;background:rgba(33,24,23,.82);color:#fff;font-size:.68rem}
 .admin-image-previews button{position:absolute;right:7px;top:7px;width:32px;height:32px;border:0;border-radius:50%;background:#741a23;color:#fff;font-size:1.1rem;cursor:pointer}
@@ -273,7 +273,7 @@ body{background:#FBF6ED;color:#211817}
 @media(max-width:700px){.admin-wrap{padding:24px 14px}.admin-form{grid-template-columns:1fr}.admin-form>*{grid-column:1!important}.product-section-heading,.batch-panel-heading{display:grid}.admin-image-previews{grid-template-columns:repeat(3,1fr)}.admin-form-actions{display:grid}.admin-form-actions .btn{width:100%}.admin-table{min-width:700px}.admin-panel{overflow-x:auto}.batch-list article{grid-template-columns:50px 1fr}.batch-list img{width:50px;height:50px}.batch-list button{grid-column:2;justify-self:start}}
 
 /* Branded owner access and control centre */
-html{background:#FBF6ED}
+html{background:#FBF6ED;color-scheme:only light}
 body.admin-body{min-height:100vh;background-color:#FBF6ED!important;background-image:radial-gradient(ellipse at 92% 7%,rgba(144,34,45,.1),transparent 24%),radial-gradient(ellipse at 7% 90%,rgba(203,132,103,.09),transparent 28%)!important;color:#211817!important}
 .admin-brandbar{min-height:82px;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.7rem clamp(1rem,5vw,4rem);background:rgba(255,253,248,.94);border-bottom:1px solid rgba(116,26,35,.14);backdrop-filter:blur(14px)}
 .admin-brand{display:flex;align-items:center;gap:.75rem;color:#211817;text-decoration:none;font:700 clamp(1.7rem,3vw,2.5rem)/1 Georgia,serif;letter-spacing:-.045em}.admin-brand img{width:48px;height:48px;object-fit:contain}.admin-brand b{color:#741a23}

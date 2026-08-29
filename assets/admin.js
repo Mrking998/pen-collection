@@ -104,6 +104,31 @@
   let selectedFiles = [];
   let existingImages = [];
   let productBatch = [];
+  let processingImages = false;
+
+  async function compressToWebP(file) {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Use a JPG, PNG or WebP picture.');
+    if (file.size > 15 * 1024 * 1024) throw new Error('Each original picture must be smaller than 15 MB.');
+    const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    const maxDimension = 1800;
+    const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const context = canvas.getContext('2d', { alpha: true });
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    let quality = 0.84;
+    let blob = null;
+    do {
+      blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', quality));
+      quality -= 0.08;
+    } while (blob && blob.size > 5 * 1024 * 1024 && quality >= 0.52);
+    if (!blob || blob.type !== 'image/webp') throw new Error('This browser could not convert the picture to WebP.');
+    if (blob.size > 5 * 1024 * 1024) throw new Error('The optimized picture is still too large. Choose a smaller original.');
+    const baseName = file.name.replace(/\.[^.]+$/, '').slice(0, 90) || 'product-picture';
+    return new File([blob], `${baseName}.webp`, { type: 'image/webp', lastModified: Date.now() });
+  }
 
   function loadProducts() {
     fetch('/api/admin/products')
@@ -132,35 +157,50 @@
   }
 
   function currentImages() {
-    return existingImages.concat(selectedFiles.map((entry) => entry.preview)).slice(0, 3);
+    return existingImages.concat(selectedFiles.map((entry) => entry.preview)).slice(0, 5);
   }
 
   function renderImagePreviews() {
     const images = currentImages();
     imagePreviews.innerHTML = images.map((src, index) => `<figure><img src="${escapeHtml(src)}" alt="Selected product picture ${index + 1}"><figcaption>${index + 1}${index === 0 ? ' · Main' : ''}</figcaption><button type="button" data-remove-image="${index}" aria-label="Remove picture ${index + 1}">×</button></figure>`).join('');
-    imageLimit.textContent = images.length === 3 ? '3 of 3 pictures selected — limit reached' : `${images.length} of 3 pictures selected`;
-    imageInput.disabled = images.length >= 3;
-    imageInput.closest('.admin-image-field').classList.toggle('limit-reached', images.length >= 3);
+    imageLimit.textContent = images.length === 5 ? '5 of 5 pictures selected — limit reached' : `${images.length} of 5 pictures selected`;
+    imageInput.disabled = images.length >= 5;
+    imageInput.closest('.admin-image-field').classList.toggle('limit-reached', images.length >= 5);
   }
 
-  imageInput.addEventListener('change', () => {
+  imageInput.addEventListener('change', async () => {
     imageError.textContent = '';
-    const available = 3 - currentImages().length;
+    const available = 5 - currentImages().length;
     const files = Array.from(imageInput.files || []);
     if (files.length > available) {
-      imageError.textContent = `Only ${available} more picture${available === 1 ? '' : 's'} can be added. Each product has a maximum of 3.`;
+      imageError.textContent = `Only ${available} more picture${available === 1 ? '' : 's'} can be added. Each product has a maximum of 5.`;
       imageInput.value = '';
       return;
     }
-    const invalid = files.find((file) => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024);
+    const invalid = files.find((file) => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 15 * 1024 * 1024);
     if (invalid) {
-      imageError.textContent = 'Use JPG, PNG or WebP pictures no larger than 5 MB each.';
+      imageError.textContent = 'Use JPG, PNG or WebP originals no larger than 15 MB each.';
       imageInput.value = '';
       return;
     }
-    files.forEach((file) => selectedFiles.push({ file, preview: URL.createObjectURL(file) }));
-    imageInput.value = '';
-    renderImagePreviews();
+    imageInput.disabled = true;
+    processingImages = true;
+    document.getElementById('product-save').disabled = true;
+    imageLimit.textContent = `Optimizing ${files.length} picture${files.length === 1 ? '' : 's'} to WebP…`;
+    try {
+      for (const file of files) {
+        const optimized = await compressToWebP(file);
+        selectedFiles.push({ file: optimized, preview: URL.createObjectURL(optimized) });
+      }
+    } catch (error) {
+      imageError.textContent = error.message || 'A picture could not be optimized.';
+    } finally {
+      processingImages = false;
+      document.getElementById('product-save').disabled = false;
+      imageInput.value = '';
+      imageInput.disabled = false;
+      renderImagePreviews();
+    }
   });
 
   imagePreviews.addEventListener('click', (event) => {
@@ -195,7 +235,7 @@
     productForm.category.value = p.category || '';
     productForm.description.value = p.description || '';
     productForm.price_naira.value = p.price_kobo / 100;
-    existingImages = (p.images || (p.image_url ? [p.image_url] : [])).slice(0, 3);
+    existingImages = (p.images || (p.image_url ? [p.image_url] : [])).slice(0, 5);
     selectedFiles = [];
     renderImagePreviews();
     productForm.sizes.value = (p.sizes || []).join(', ');
@@ -257,7 +297,7 @@
 
   async function saveDraft(draft) {
     const uploaded = await uploadFiles(draft.files);
-    const payload = Object.assign({}, draft, { images: draft.existingImages.concat(uploaded).slice(0, 3) });
+    const payload = Object.assign({}, draft, { images: draft.existingImages.concat(uploaded).slice(0, 5) });
     delete payload.files; delete payload.existingImages; delete payload.previews;
     const response = await adminFetch('/api/admin/products', { method: draft.id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'The product could not be saved.');
@@ -265,6 +305,7 @@
 
   productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (processingImages) return;
     const saveButton = document.getElementById('product-save');
     saveButton.disabled = true;
     saveButton.textContent = 'Saving…';

@@ -99,7 +99,7 @@ function product(row: ProductRow) {
   let images: string[] = [];
   try { sizes = JSON.parse(row.sizes_json) as string[]; } catch { sizes = []; }
   try { images = JSON.parse(row.images_json || '[]') as string[]; } catch { images = []; }
-  images = images.filter(Boolean).slice(0, 3);
+  images = images.filter(Boolean).slice(0, 5);
   if (!images.length && row.image_url) images = [row.image_url];
   return { ...row, images, image_url: images[0] || null, sizes, is_active: Boolean(row.is_active), sizes_json: undefined, images_json: undefined, image_key: undefined };
 }
@@ -119,7 +119,7 @@ function integer(value: unknown, min = 0): number {
 function productInput(data: Record<string, unknown>) {
   const rawSizes = Array.isArray(data.sizes) ? data.sizes : [];
   const rawImages = Array.isArray(data.images) ? data.images : (data.image_url ? [data.image_url] : []);
-  const images = rawImages.map((value) => cleanText(value, 500)).filter((value): value is string => Boolean(value)).slice(0, 3);
+  const images = rawImages.map((value) => cleanText(value, 500)).filter((value): value is string => Boolean(value)).slice(0, 5);
   return {
     name: cleanText(data.name, 160, true) as string,
     color: cleanText(data.color, 80), category: cleanText(data.category, 80),
@@ -234,6 +234,10 @@ async function messages(request: Request, env: Env): Promise<Response> {
 
 async function route(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url); const path = url.pathname;
+  if (path === '/') {
+    const homeUrl = new URL('/index.html', url);
+    return env.ASSETS.fetch(new Request(homeUrl, request));
+  }
   if (path === '/admin' || path === '/admin/') return Response.redirect(`${url.origin}/admin.html`, 302);
   if (path === '/api/products') return request.method === 'GET' ? publicProducts(env) : methodNotAllowed('GET');
   if (path === '/api/admin/login') return login(request, env);
