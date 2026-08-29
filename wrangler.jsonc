@@ -19,8 +19,9 @@
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
+    "html_handling": "none",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*", "/media/*"]
+    "run_worker_first": ["/api/*", "/media/*", "/admin", "/admin/"]
   },
   "d1_databases": [
     {

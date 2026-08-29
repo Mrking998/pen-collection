@@ -9,22 +9,31 @@
 <link rel="icon" href="favicon.ico" sizes="any">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
-<link rel="stylesheet" href="assets/backend.css">
+<link rel="stylesheet" href="assets/backend.css?v=20260829-2">
 </head>
-<body>
+<body class="admin-body">
+<header class="admin-brandbar">
+  <a href="index.html" class="admin-brand" aria-label="Pen Collection storefront"><img src="assets/pen-collection-mark-transparent.png" alt=""><span>Pen <b>C</b>ollection</span></a>
+  <div class="admin-brand-actions"><span>Owner workspace</span><a href="index.html">View storefront</a></div>
+</header>
 <div class="wrap admin-wrap">
-  <h1 style="font-family:'DM Sans',sans-serif; font-size:24px; margin-bottom:20px;">Pen Collection — Admin</h1>
 
   <section id="admin-login" class="admin-login">
-    <form id="login-form">
+    <div class="login-intro" aria-hidden="true"><span class="login-petal petal-one"></span><span class="login-petal petal-two"></span><p>PRIVATE OWNER ACCESS</p><h1>Welcome back.</h1><span>Manage new arrivals, product pictures, prices and stock from one focused workspace.</span></div>
+    <form id="login-form" class="login-card" novalidate>
+      <p class="admin-kicker">SECURE SIGN IN</p>
+      <h2>Open the control centre</h2>
+      <p class="login-help">Enter the owner password to continue.</p>
       <label for="login-password">Admin password</label>
       <span class="password-field"><input type="password" id="login-password" required><button type="button" id="toggle-password" aria-label="Show password">Show</button></span>
-      <button type="submit" class="btn btn-gold">Log In</button>
-      <p id="login-error" class="error-msg" style="color:#b33;"></p>
+      <button type="submit" class="btn btn-gold login-submit"><span>Log in</span><i aria-hidden="true"></i></button>
+      <div id="login-error" class="login-feedback" role="alert" aria-live="assertive" hidden><b aria-hidden="true">!</b><span></span></div>
+      <small class="login-security">Protected owner area · Your session closes automatically after 8 hours.</small>
     </form>
   </section>
 
   <section id="admin-dashboard" style="display:none;">
+    <div class="dashboard-welcome"><p class="admin-kicker">OWNER CONTROL CENTRE</p><h1>Catalogue dashboard</h1><p>Add products, monitor enquiries and keep the storefront current.</p></div>
     <div class="admin-header">
       <div class="admin-tabs">
         <button type="button" class="admin-tab active" data-tab="products">Products</button>
@@ -88,6 +97,6 @@
     </div>
   </section>
 </div>
-<script src="assets/admin.js"></script><script>document.getElementById('toggle-password').addEventListener('click',function(){var input=document.getElementById('login-password'),show=input.type==='password';input.type=show?'text':'password';this.textContent=show?'Hide':'Show';this.setAttribute('aria-label',(show?'Hide':'Show')+' password');});</script>
+<script src="assets/admin.js?v=20260829-2"></script><script>document.getElementById('toggle-password').addEventListener('click',function(){var input=document.getElementById('login-password'),show=input.type==='password';input.type=show?'text':'password';this.textContent=show?'Hide':'Show';this.setAttribute('aria-label',(show?'Hide':'Show')+' password');});</script>
 </body>
 </html>

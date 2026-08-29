@@ -24,6 +24,7 @@
   }
 
   function showDashboard() {
+    document.body.classList.add('dashboard-open');
     loginSection.style.display = 'none';
     dashboard.style.display = 'block';
     loadProducts();
@@ -39,15 +40,39 @@
 
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    loginError.textContent = '';
+    const submitButton = loginForm.querySelector('.login-submit');
+    const submitLabel = submitButton.querySelector('span');
+    const feedbackText = loginError.querySelector('span');
     const password = document.getElementById('login-password').value;
-    const resp = await fetch('/api/admin/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password }),
-    });
-    if (resp.ok) showDashboard();
-    else loginError.textContent = 'Incorrect password.';
+    loginError.hidden = true;
+    loginError.className = 'login-feedback';
+    loginForm.classList.remove('login-shake');
+    if (!password) {
+      feedbackText.textContent = 'Enter the admin password before continuing.';
+      loginError.hidden = false; loginError.classList.add('is-error');
+      document.getElementById('login-password').focus();
+      return;
+    }
+    submitButton.disabled = true; submitButton.classList.add('is-loading'); submitLabel.textContent = 'Checking password…';
+    try {
+      const resp = await fetch('/api/admin/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }),
+      });
+      const result = await resp.json().catch(() => ({}));
+      if (resp.ok) {
+        submitButton.classList.remove('is-loading'); submitButton.classList.add('is-success'); submitLabel.textContent = 'Access granted';
+        feedbackText.textContent = 'Password accepted. Opening the control centre…'; loginError.hidden = false; loginError.classList.add('is-success');
+        setTimeout(showDashboard, 450);
+        return;
+      }
+      const message = resp.status === 429 ? 'Too many attempts. Wait 15 minutes before trying again.' : resp.status === 503 ? 'Owner login is temporarily unavailable. Please contact the site administrator.' : result.error === 'Invalid request origin' ? 'This login page is outdated. Refresh the page and try again.' : 'Incorrect password. Check it carefully and try again.';
+      feedbackText.textContent = message; loginError.hidden = false; loginError.classList.add('is-error');
+      loginForm.classList.add('login-shake'); document.getElementById('login-password').select();
+    } catch (error) {
+      feedbackText.textContent = 'The site could not check the password. Confirm your connection and try again.';
+      loginError.hidden = false; loginError.classList.add('is-error');
+    }
+    submitButton.disabled = false; submitButton.classList.remove('is-loading'); submitLabel.textContent = 'Log in';
   });
 
   logoutBtn.addEventListener('click', async () => {

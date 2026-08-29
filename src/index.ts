@@ -234,6 +234,7 @@ async function messages(request: Request, env: Env): Promise<Response> {
 
 async function route(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url); const path = url.pathname;
+  if (path === '/admin' || path === '/admin/') return Response.redirect(`${url.origin}/admin.html`, 302);
   if (path === '/api/products') return request.method === 'GET' ? publicProducts(env) : methodNotAllowed('GET');
   if (path === '/api/admin/login') return login(request, env);
   if (path === '/api/admin/logout') return request.method === 'POST' ? json({ ok: true }, 200, { 'set-cookie': clearSessionCookie() }) : methodNotAllowed('POST');
