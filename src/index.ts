@@ -10,7 +10,7 @@ const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 type ProductRow = {
   id: number; name: string; color: string | null; category: string | null;
   description: string | null; price_kobo: number; image_url: string | null;
-  image_key: string | null; sizes_json: string; stock_quantity: number;
+  image_key: string | null; images_json: string; sizes_json: string; stock_quantity: number;
   is_active: number; created_at: string; updated_at: string;
 };
 
@@ -96,8 +96,12 @@ async function bodyJson(request: Request): Promise<Record<string, unknown>> {
 
 function product(row: ProductRow) {
   let sizes: string[] = [];
+  let images: string[] = [];
   try { sizes = JSON.parse(row.sizes_json) as string[]; } catch { sizes = []; }
-  return { ...row, sizes, is_active: Boolean(row.is_active), sizes_json: undefined, image_key: undefined };
+  try { images = JSON.parse(row.images_json || '[]') as string[]; } catch { images = []; }
+  images = images.filter(Boolean).slice(0, 3);
+  if (!images.length && row.image_url) images = [row.image_url];
+  return { ...row, images, image_url: images[0] || null, sizes, is_active: Boolean(row.is_active), sizes_json: undefined, images_json: undefined, image_key: undefined };
 }
 
 function cleanText(value: unknown, max: number, required = false): string | null {
@@ -114,12 +118,14 @@ function integer(value: unknown, min = 0): number {
 
 function productInput(data: Record<string, unknown>) {
   const rawSizes = Array.isArray(data.sizes) ? data.sizes : [];
+  const rawImages = Array.isArray(data.images) ? data.images : (data.image_url ? [data.image_url] : []);
+  const images = rawImages.map((value) => cleanText(value, 500)).filter((value): value is string => Boolean(value)).slice(0, 3);
   return {
     name: cleanText(data.name, 160, true) as string,
     color: cleanText(data.color, 80), category: cleanText(data.category, 80),
     description: cleanText(data.description, 1200), price: integer(data.price_kobo),
-    imageUrl: cleanText(data.image_url, 500),
-    imageKey: typeof data.image_url === 'string' && data.image_url.startsWith('/media/') ? data.image_url.slice(7) : null,
+    images, imageUrl: images[0] || null,
+    imageKey: images[0]?.startsWith('/media/') ? images[0].slice(7) : null,
     sizes: rawSizes.map((size) => String(size).trim().slice(0, 30)).filter(Boolean).slice(0, 30),
     stock: integer(data.stock_quantity), active: data.is_active === false ? 0 : 1,
   };
@@ -166,22 +172,25 @@ async function adminProducts(request: Request, env: Env): Promise<Response> {
   if (!sameOriginMutation(request) || request.headers.get('x-pc-admin') !== '1') return json({ error: 'Invalid admin request' }, 403);
   if (request.method === 'DELETE') {
     const id = integer(new URL(request.url).searchParams.get('id'), 1);
-    const row = await env.DB.prepare('SELECT image_key FROM products WHERE id = ?').bind(id).first<{ image_key: string | null }>();
+    const row = await env.DB.prepare('SELECT image_key, images_json FROM products WHERE id = ?').bind(id).first<{ image_key: string | null; images_json: string | null }>();
     await env.DB.prepare('DELETE FROM products WHERE id = ?').bind(id).run();
-    if (row?.image_key) await env.PRODUCT_IMAGES.delete(row.image_key);
+    let imageKeys: string[] = [];
+    try { imageKeys = JSON.parse(row?.images_json || '[]').filter((value: unknown) => typeof value === 'string' && value.startsWith('/media/')).map((value: string) => value.slice(7)); } catch { imageKeys = []; }
+    if (row?.image_key) imageKeys.push(row.image_key);
+    if (imageKeys.length) await env.PRODUCT_IMAGES.delete([...new Set(imageKeys)]);
     return json({ ok: true });
   }
   if (request.method !== 'POST' && request.method !== 'PUT') return methodNotAllowed('GET, POST, PUT, DELETE');
   const data = await bodyJson(request); const input = productInput(data);
   if (request.method === 'POST') {
     const result = await env.DB.prepare(`INSERT INTO products
-      (name,color,category,description,price_kobo,image_url,image_key,sizes_json,stock_quantity,is_active)
-      VALUES (?,?,?,?,?,?,?,?,?,?) RETURNING *`).bind(input.name,input.color,input.category,input.description,input.price,input.imageUrl,input.imageKey,JSON.stringify(input.sizes),input.stock,input.active).first<ProductRow>();
+      (name,color,category,description,price_kobo,image_url,image_key,images_json,sizes_json,stock_quantity,is_active)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?) RETURNING *`).bind(input.name,input.color,input.category,input.description,input.price,input.imageUrl,input.imageKey,JSON.stringify(input.images),JSON.stringify(input.sizes),input.stock,input.active).first<ProductRow>();
     return json({ product: result ? product(result) : null }, 201);
   }
   const id = integer(data.id, 1);
-  const result = await env.DB.prepare(`UPDATE products SET name=?,color=?,category=?,description=?,price_kobo=?,image_url=?,image_key=?,sizes_json=?,stock_quantity=?,is_active=?,updated_at=datetime('now') WHERE id=? RETURNING *`)
-    .bind(input.name,input.color,input.category,input.description,input.price,input.imageUrl,input.imageKey,JSON.stringify(input.sizes),input.stock,input.active,id).first<ProductRow>();
+  const result = await env.DB.prepare(`UPDATE products SET name=?,color=?,category=?,description=?,price_kobo=?,image_url=?,image_key=?,images_json=?,sizes_json=?,stock_quantity=?,is_active=?,updated_at=datetime('now') WHERE id=? RETURNING *`)
+    .bind(input.name,input.color,input.category,input.description,input.price,input.imageUrl,input.imageKey,JSON.stringify(input.images),JSON.stringify(input.sizes),input.stock,input.active,id).first<ProductRow>();
   return result ? json({ product: product(result) }) : json({ error: 'Product not found' }, 404);
 }
 

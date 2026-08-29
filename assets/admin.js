@@ -67,6 +67,18 @@
   // ---------------- PRODUCTS ----------------
   const productList = document.getElementById('product-list');
   const productForm = document.getElementById('product-form');
+  const imageInput = document.getElementById('product-images');
+  const imagePreviews = document.getElementById('image-previews');
+  const imageLimit = document.getElementById('image-limit');
+  const imageError = document.getElementById('image-error');
+  const batchPanel = document.getElementById('batch-panel');
+  const batchList = document.getElementById('batch-list');
+  const batchCount = document.getElementById('batch-count');
+  const batchStatus = document.getElementById('batch-status');
+  const publishBatch = document.getElementById('publish-batch');
+  let selectedFiles = [];
+  let existingImages = [];
+  let productBatch = [];
 
   function loadProducts() {
     fetch('/api/admin/products')
@@ -94,6 +106,50 @@
     productList._data = products;
   }
 
+  function currentImages() {
+    return existingImages.concat(selectedFiles.map((entry) => entry.preview)).slice(0, 3);
+  }
+
+  function renderImagePreviews() {
+    const images = currentImages();
+    imagePreviews.innerHTML = images.map((src, index) => `<figure><img src="${escapeHtml(src)}" alt="Selected product picture ${index + 1}"><figcaption>${index + 1}${index === 0 ? ' · Main' : ''}</figcaption><button type="button" data-remove-image="${index}" aria-label="Remove picture ${index + 1}">×</button></figure>`).join('');
+    imageLimit.textContent = images.length === 3 ? '3 of 3 pictures selected — limit reached' : `${images.length} of 3 pictures selected`;
+    imageInput.disabled = images.length >= 3;
+    imageInput.closest('.admin-image-field').classList.toggle('limit-reached', images.length >= 3);
+  }
+
+  imageInput.addEventListener('change', () => {
+    imageError.textContent = '';
+    const available = 3 - currentImages().length;
+    const files = Array.from(imageInput.files || []);
+    if (files.length > available) {
+      imageError.textContent = `Only ${available} more picture${available === 1 ? '' : 's'} can be added. Each product has a maximum of 3.`;
+      imageInput.value = '';
+      return;
+    }
+    const invalid = files.find((file) => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024);
+    if (invalid) {
+      imageError.textContent = 'Use JPG, PNG or WebP pictures no larger than 5 MB each.';
+      imageInput.value = '';
+      return;
+    }
+    files.forEach((file) => selectedFiles.push({ file, preview: URL.createObjectURL(file) }));
+    imageInput.value = '';
+    renderImagePreviews();
+  });
+
+  imagePreviews.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-remove-image]');
+    if (!button) return;
+    const index = Number(button.dataset.removeImage);
+    if (index < existingImages.length) existingImages.splice(index, 1);
+    else {
+      const removed = selectedFiles.splice(index - existingImages.length, 1)[0];
+      if (removed) URL.revokeObjectURL(removed.preview);
+    }
+    renderImagePreviews();
+  });
+
   productList.addEventListener('click', (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;
@@ -114,71 +170,104 @@
     productForm.category.value = p.category || '';
     productForm.description.value = p.description || '';
     productForm.price_naira.value = p.price_kobo / 100;
-    productForm.image_url.value = p.image_url || '';
+    existingImages = (p.images || (p.image_url ? [p.image_url] : [])).slice(0, 3);
+    selectedFiles = [];
+    renderImagePreviews();
     productForm.sizes.value = (p.sizes || []).join(', ');
     productForm.stock_quantity.value = p.stock_quantity;
     productForm.is_active.checked = p.is_active;
-    document.getElementById('product-form-title').textContent = 'Edit Product';
+    document.getElementById('product-form-title').textContent = 'Edit product';
+    document.getElementById('product-save').textContent = 'Save changes';
+    productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  document.getElementById('product-form-reset').addEventListener('click', () => {
+  function resetProductForm(preservePreviews) {
+    if (!preservePreviews) selectedFiles.forEach((entry) => URL.revokeObjectURL(entry.preview));
+    selectedFiles = [];
+    existingImages = [];
     productForm.reset();
     productForm.id.value = '';
-    document.getElementById('product-form-title').textContent = 'Add Product';
+    document.getElementById('product-form-title').textContent = 'Add a product';
+    document.getElementById('product-save').textContent = 'Add to upload list';
+    imageError.textContent = '';
+    renderImagePreviews();
+  }
+
+  document.getElementById('product-form-reset').addEventListener('click', () => resetProductForm(false));
+
+  function draftFromForm() {
+    return {
+      id: productForm.id.value || undefined,
+      name: productForm.name.value.trim(), color: productForm.color.value.trim(), category: productForm.category.value.trim(),
+      description: productForm.description.value.trim(), price_kobo: Math.round(parseFloat(productForm.price_naira.value) * 100),
+      sizes: productForm.sizes.value.split(',').map((s) => s.trim()).filter(Boolean),
+      stock_quantity: parseInt(productForm.stock_quantity.value, 10) || 0, is_active: productForm.is_active.checked,
+      existingImages: existingImages.slice(), files: selectedFiles.map((entry) => entry.file), previews: currentImages(),
+    };
+  }
+
+  function renderBatch() {
+    batchCount.textContent = `${productBatch.length} of 10 ready`;
+    batchPanel.hidden = productBatch.length === 0;
+    batchList.innerHTML = productBatch.map((draft, index) => `<article><img src="${escapeHtml(draft.previews[0] || '')}" alt=""><div><strong>${escapeHtml(draft.name)}</strong><span>${escapeHtml(draft.category || 'Uncategorised')} · ${formatNaira(draft.price_kobo)} · ${draft.previews.length} picture${draft.previews.length === 1 ? '' : 's'}</span></div><button type="button" data-remove-draft="${index}" aria-label="Remove ${escapeHtml(draft.name)} from upload list">Remove</button></article>`).join('');
+  }
+
+  batchList.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-remove-draft]');
+    if (!button) return;
+    productBatch.splice(Number(button.dataset.removeDraft), 1);
+    renderBatch();
   });
+
+  async function uploadFiles(files) {
+    const urls = [];
+    for (const file of files) {
+      const uploadData = new FormData(); uploadData.append('image', file);
+      const response = await adminFetch('/api/admin/upload', { method: 'POST', body: uploadData });
+      if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'A product picture could not be uploaded.');
+      urls.push((await response.json()).image_url);
+    }
+    return urls;
+  }
+
+  async function saveDraft(draft) {
+    const uploaded = await uploadFiles(draft.files);
+    const payload = Object.assign({}, draft, { images: draft.existingImages.concat(uploaded).slice(0, 3) });
+    delete payload.files; delete payload.existingImages; delete payload.previews;
+    const response = await adminFetch('/api/admin/products', { method: draft.id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'The product could not be saved.');
+  }
 
   productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const saveButton = document.getElementById('product-save');
     saveButton.disabled = true;
     saveButton.textContent = 'Saving…';
-    const id = productForm.id.value;
-    let imageUrl = productForm.image_url.value;
-    const imageFile = productForm.image_file.files[0];
-    if (imageFile) {
-      const uploadData = new FormData();
-      uploadData.append('image', imageFile);
-      const uploadResponse = await adminFetch('/api/admin/upload', { method: 'POST', body: uploadData });
-      if (!uploadResponse.ok) {
-        const failure = await uploadResponse.json().catch(() => ({}));
-        alert(failure.error || 'The product photo could not be uploaded.');
-        saveButton.disabled = false;
-        saveButton.textContent = 'Save Product';
-        return;
-      }
-      imageUrl = (await uploadResponse.json()).image_url;
+    const draft = draftFromForm();
+    if (!draft.previews.length) { imageError.textContent = 'Add at least one product picture.'; saveButton.disabled = false; saveButton.textContent = draft.id ? 'Save changes' : 'Add to upload list'; return; }
+    if (draft.id) {
+      try { await saveDraft(draft); resetProductForm(); loadProducts(); }
+      catch (error) { alert(error.message); }
+    } else {
+      if (productBatch.length >= 10) { batchStatus.textContent = 'Publish this batch before adding more than 10 products.'; }
+      else { productBatch.push(draft); renderBatch(); resetProductForm(true); productForm.name.focus(); }
     }
-    const payload = {
-      id: id || undefined,
-      name: productForm.name.value,
-      color: productForm.color.value,
-      category: productForm.category.value,
-      description: productForm.description.value,
-      price_kobo: Math.round(parseFloat(productForm.price_naira.value) * 100),
-      image_url: imageUrl,
-      sizes: productForm.sizes.value.split(',').map((s) => s.trim()).filter(Boolean),
-      stock_quantity: parseInt(productForm.stock_quantity.value, 10) || 0,
-      is_active: productForm.is_active.checked,
-    };
-    const response = await adminFetch('/api/admin/products', {
-      method: id ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      const failure = await response.json().catch(() => ({}));
-      alert(failure.error || 'The product could not be saved.');
-      saveButton.disabled = false;
-      saveButton.textContent = 'Save Product';
-      return;
-    }
-    productForm.reset();
-    productForm.id.value = '';
-    document.getElementById('product-form-title').textContent = 'Add Product';
-    loadProducts();
     saveButton.disabled = false;
-    saveButton.textContent = 'Save Product';
+    saveButton.textContent = productForm.id.value ? 'Save changes' : 'Add to upload list';
   });
+
+  publishBatch.addEventListener('click', async () => {
+    if (!productBatch.length) return;
+    publishBatch.disabled = true; batchStatus.textContent = `Publishing 0 of ${productBatch.length}…`;
+    const total = productBatch.length;
+    try {
+      for (let index = 0; index < total; index += 1) { batchStatus.textContent = `Publishing ${index + 1} of ${total}: ${productBatch[index].name}`; await saveDraft(productBatch[index]); }
+      productBatch = []; renderBatch(); loadProducts(); batchStatus.textContent = `${total} product${total === 1 ? '' : 's'} published successfully.`;
+    } catch (error) { batchStatus.textContent = error.message || 'Publishing stopped. Please try again.'; }
+    publishBatch.disabled = false;
+  });
+
+  renderImagePreviews(); renderBatch();
 
   // ---------------- ORDERS ----------------
   const orderList = document.getElementById('order-list');

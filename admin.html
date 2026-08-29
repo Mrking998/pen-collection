@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#F3E9D3">
+<meta name="theme-color" content="#FBF6ED">
 <title>Admin — Pen Collection</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -35,7 +35,7 @@
     </div>
 
     <div id="panel-products" class="admin-panel active">
-      <h2 id="product-form-title">Add Product</h2>
+      <div class="product-section-heading"><div><p class="admin-kicker">CATALOGUE MANAGER</p><h2 id="product-form-title">Add a product</h2><p>Complete one product, add it to the upload list, then continue. You can publish up to 10 products together.</p></div><span id="batch-count" class="batch-count">0 of 10 ready</span></div>
       <form id="product-form" class="admin-form">
         <input type="hidden" name="id">
         <input type="text" name="name" placeholder="Product name (e.g. Navy Peplum Skirt Suit)" required>
@@ -43,19 +43,28 @@
         <input type="text" name="category" placeholder="Category (e.g. Skirt suit)">
         <textarea name="description" placeholder="Short description"></textarea>
         <input type="number" step="0.01" name="price_naira" placeholder="Price in ₦ (e.g. 85000)" required>
-        <label class="admin-image-field">Product photo
-          <input type="file" name="image_file" accept="image/jpeg,image/png,image/webp">
-          <small>JPG, PNG or WebP, up to 5 MB. Existing image is retained when no new photo is selected.</small>
+        <label class="admin-image-field" for="product-images">
+          <span class="image-picker-plus" aria-hidden="true">+</span>
+          <strong>Add product pictures</strong>
+          <span id="image-limit">Choose 1–3 pictures of this product</span>
+          <input id="product-images" type="file" name="image_files" accept="image/jpeg,image/png,image/webp" multiple>
+          <small>JPG, PNG or WebP, up to 5 MB each. The first picture becomes the main storefront picture.</small>
         </label>
-        <input type="hidden" name="image_url">
+        <div id="image-previews" class="admin-image-previews" aria-live="polite"></div>
+        <p id="image-error" class="admin-field-error" role="alert"></p>
         <input type="text" name="sizes" placeholder="Sizes, comma separated (e.g. UK 10, UK 12, UK 14)">
         <input type="number" name="stock_quantity" placeholder="Stock quantity" required>
         <label class="checkbox-label"><input type="checkbox" name="is_active" checked> Visible on site</label>
         <div class="admin-form-actions">
-          <button type="submit" class="btn btn-gold" id="product-save">Save Product</button>
+          <button type="submit" class="btn btn-gold" id="product-save">Add to upload list</button>
           <button type="button" id="product-form-reset" class="btn btn-outline">Clear / New</button>
         </div>
       </form>
+      <section id="batch-panel" class="batch-panel" hidden>
+        <div class="batch-panel-heading"><div><h3>Products ready to publish</h3><p>Review the list before sending everything to the storefront.</p></div><button type="button" id="publish-batch" class="btn btn-gold">Publish products</button></div>
+        <div id="batch-list" class="batch-list"></div>
+        <p id="batch-status" class="batch-status" aria-live="polite"></p>
+      </section>
       <table class="admin-table">
         <thead><tr><th>Name</th><th>Color</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="product-list"></tbody>

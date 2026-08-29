@@ -244,3 +244,30 @@
 .admin-image-field{display:grid;gap:8px;padding:14px;border:1px dashed rgba(116,26,35,.35);border-radius:10px;background:rgba(255,255,255,.38)}
 .admin-image-field small{color:#6d625c;font-size:12px;line-height:1.4}
 .admin-image-field input[type=file]{width:100%}
+
+/* Owner-first catalogue workflow */
+body{background:#FBF6ED;color:#211817}
+.admin-wrap{max-width:1120px}
+.product-section-heading,.batch-panel-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1rem}
+.product-section-heading h2,.batch-panel h3{margin:.15rem 0 .35rem}.product-section-heading p,.batch-panel-heading p{margin:0;color:#6d625c}
+.admin-kicker{font-size:.7rem;font-weight:700;letter-spacing:.16em;color:#741a23!important}
+.batch-count{flex:0 0 auto;padding:.5rem .75rem;border-radius:999px;background:rgba(116,26,35,.08);color:#741a23;font-weight:700;font-size:.75rem}
+.admin-form{max-width:720px;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:clamp(1rem,3vw,1.6rem);background:rgba(255,255,255,.55);border:1px solid rgba(116,26,35,.14);border-radius:20px}
+.admin-form textarea,.admin-image-field,.admin-image-previews,.admin-field-error,.checkbox-label,.admin-form-actions{grid-column:1/-1}
+.admin-form input,.admin-form textarea{min-height:46px;border-radius:10px;background:#fff;color:#211817}
+.admin-image-field{position:relative;place-items:center;text-align:center;padding:1.6rem;cursor:pointer;background:#fffaf5;border:2px dashed rgba(116,26,35,.32);transition:.2s}
+.admin-image-field:hover,.admin-image-field:focus-within{border-color:#741a23;background:#fff}
+.admin-image-field.limit-reached{cursor:not-allowed;border-style:solid;background:rgba(116,26,35,.05)}
+.admin-image-field input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}.admin-image-field input:disabled{cursor:not-allowed}
+.image-picker-plus{width:48px;height:48px;display:grid;place-items:center;border-radius:50%;background:#741a23;color:#fff;font-size:2rem;line-height:1}
+.admin-image-field strong{font-size:1rem}.admin-image-field>span:not(.image-picker-plus){font-size:.8rem;color:#6d625c}
+.admin-image-previews{display:grid;grid-template-columns:repeat(3,minmax(0,150px));gap:10px}
+.admin-image-previews figure{position:relative;margin:0;aspect-ratio:1;border-radius:14px;overflow:hidden;background:#efe7da;border:1px solid var(--line)}
+.admin-image-previews img{width:100%;height:100%;object-fit:cover}.admin-image-previews figcaption{position:absolute;left:7px;bottom:7px;padding:.25rem .45rem;border-radius:999px;background:rgba(33,24,23,.82);color:#fff;font-size:.68rem}
+.admin-image-previews button{position:absolute;right:7px;top:7px;width:32px;height:32px;border:0;border-radius:50%;background:#741a23;color:#fff;font-size:1.1rem;cursor:pointer}
+.admin-field-error{min-height:1.2em;margin:0;color:#a3352b;font-size:.78rem;font-weight:600}
+.batch-panel{margin:1.5rem 0 2rem;padding:1.25rem;border:1px solid rgba(116,26,35,.18);border-radius:20px;background:#fffaf5}
+.batch-list{display:grid;gap:.65rem}.batch-list article{display:grid;grid-template-columns:58px 1fr auto;align-items:center;gap:.8rem;padding:.65rem;border-radius:13px;background:#fff;border:1px solid rgba(116,26,35,.12)}
+.batch-list img{width:58px;height:58px;object-fit:cover;border-radius:9px;background:#efe7da}.batch-list strong,.batch-list span{display:block}.batch-list span{margin-top:.2rem;color:#6d625c;font-size:.75rem}.batch-list button{border:0;background:transparent;color:#741a23;text-decoration:underline;cursor:pointer}
+.batch-status{min-height:1.3em;margin:.8rem 0 0;color:#356747;font-weight:600;font-size:.8rem}
+@media(max-width:700px){.admin-wrap{padding:24px 14px}.admin-form{grid-template-columns:1fr}.admin-form>*{grid-column:1!important}.product-section-heading,.batch-panel-heading{display:grid}.admin-image-previews{grid-template-columns:repeat(3,1fr)}.admin-form-actions{display:grid}.admin-form-actions .btn{width:100%}.admin-table{min-width:700px}.admin-panel{overflow-x:auto}.batch-list article{grid-template-columns:50px 1fr}.batch-list img{width:50px;height:50px}.batch-list button{grid-column:2;justify-self:start}}
