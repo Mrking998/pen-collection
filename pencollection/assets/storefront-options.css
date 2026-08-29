@@ -179,3 +179,6 @@ body.editorial:not(.dark) .badge{background:#FBF6ED}
 @media(max-width:420px){.editorial .topbar{grid-template-columns:48px minmax(0,1fr) auto}.editorial .brand-monogram{width:44px;height:44px}}
 body.editorial:not(.dark) .shop-head p,body.editorial:not(.dark) .meta,body.editorial:not(.dark) .description{color:#625853}
 @media(max-width:700px){body.editorial:not(.dark) .hero::before{right:-16%;width:64vw;opacity:.48}body.editorial:not(.dark) .hero::after{opacity:.4}}
+/* Stable compact brand alignment on phones. */
+@media(max-width:700px){.editorial .topbar{grid-template-columns:48px minmax(0,1fr) auto;min-height:66px;padding:.55rem .75rem;column-gap:.55rem;align-items:center}.editorial .brand-monogram{width:44px;height:44px;margin:0;align-self:center;justify-self:center}.editorial .header-wordmark{align-self:center;justify-self:start;width:clamp(118px,38vw,190px);margin-left:.12rem}.editorial .topbar .contact-nav{align-self:center;padding-top:0}}
+@media(max-width:420px){.editorial .topbar{grid-template-columns:42px minmax(0,1fr) auto;padding-left:.6rem;padding-right:.6rem;column-gap:.3rem}.editorial .brand-monogram{width:40px;height:40px}.editorial .header-wordmark{width:clamp(108px,35vw,148px)}}

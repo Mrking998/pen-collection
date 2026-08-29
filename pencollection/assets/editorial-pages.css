@@ -34,6 +34,8 @@ h2{font-size:clamp(1.7rem,4vw,2.7rem);margin:2.5rem 0 .7rem}
 .dark .page-header{background:rgba(23,21,20,.92)}
 .dark .page-pc{background:#fbf6ed;border-radius:10px;padding:4px}
 .dark .page-pc img{filter:none}
+.dark .page-pc{background:transparent;border-radius:0;padding:0}
+.dark .page-pc img{filter:brightness(1.55) saturate(.92)}
 .dark .wordmark-text{color:#f4eadc;text-shadow:0 4px 7px rgba(0,0,0,.3)}
 .dark .wordmark-accent{color:#efb4aa}
 .dark .principles article{background:rgba(255,255,255,.04)}
@@ -43,6 +45,7 @@ h2{font-size:clamp(1.7rem,4vw,2.7rem);margin:2.5rem 0 .7rem}
 .page-pc img{width:44px;height:auto}
 .principles{grid-template-columns:1fr}
 }
+@media(max-width:650px){.page-header{grid-template-columns:44px minmax(0,1fr) auto;min-height:66px;padding:.55rem .75rem;column-gap:.45rem;align-items:center}.page-pc{width:44px;height:44px;display:grid;place-items:center;justify-self:center}.page-pc img{width:42px}.page-wordmark{justify-self:start;transform:none}.page-wordmark .wordmark-text{font-size:clamp(1.45rem,7vw,1.85rem)}}
 @media(max-width:350px){.page-wordmark{transform:none}
 .page-wordmark .wordmark-text{font-size:1.3rem}
 }
