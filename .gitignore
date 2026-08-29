@@ -3,9 +3,13 @@
 .env.*
 !.env.example
 .vercel/
+.dev.vars
 
-# Dependencies, logs, and temporary files
+# Dependencies, generated files, logs, and temporary files
 node_modules/
+public/
+.wrangler/
+worker-configuration.d.ts
 *.log
 *.tmp
 .DS_Store

@@ -11,6 +11,18 @@
     return '₦' + (kobo / 100).toLocaleString('en-NG');
   }
 
+  function escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>'"]/g, (character) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    })[character]);
+  }
+
+  function adminFetch(url, options) {
+    const next = Object.assign({}, options || {});
+    next.headers = Object.assign({}, next.headers || {}, { 'X-PC-Admin': '1' });
+    return fetch(url, next);
+  }
+
   function showDashboard() {
     loginSection.style.display = 'none';
     dashboard.style.display = 'block';
@@ -67,8 +79,8 @@
       .map(
         (p) => `
       <tr>
-        <td>${p.name}</td>
-        <td>${p.color || ''}</td>
+        <td>${escapeHtml(p.name)}</td>
+        <td>${escapeHtml(p.color || '')}</td>
         <td>${formatNaira(p.price_kobo)}</td>
         <td>${p.stock_quantity}</td>
         <td>${p.is_active ? 'Active' : 'Hidden'}</td>
@@ -90,7 +102,7 @@
     if (btn.dataset.action === 'edit' && product) fillProductForm(product);
     if (btn.dataset.action === 'delete') {
       if (confirm('Delete this product? This cannot be undone.')) {
-        fetch('/api/admin/products?id=' + id, { method: 'DELETE' }).then(loadProducts);
+        adminFetch('/api/admin/products?id=' + encodeURIComponent(id), { method: 'DELETE' }).then(loadProducts);
       }
     }
   });
@@ -117,7 +129,25 @@
 
   productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const saveButton = document.getElementById('product-save');
+    saveButton.disabled = true;
+    saveButton.textContent = 'Saving…';
     const id = productForm.id.value;
+    let imageUrl = productForm.image_url.value;
+    const imageFile = productForm.image_file.files[0];
+    if (imageFile) {
+      const uploadData = new FormData();
+      uploadData.append('image', imageFile);
+      const uploadResponse = await adminFetch('/api/admin/upload', { method: 'POST', body: uploadData });
+      if (!uploadResponse.ok) {
+        const failure = await uploadResponse.json().catch(() => ({}));
+        alert(failure.error || 'The product photo could not be uploaded.');
+        saveButton.disabled = false;
+        saveButton.textContent = 'Save Product';
+        return;
+      }
+      imageUrl = (await uploadResponse.json()).image_url;
+    }
     const payload = {
       id: id || undefined,
       name: productForm.name.value,
@@ -125,20 +155,29 @@
       category: productForm.category.value,
       description: productForm.description.value,
       price_kobo: Math.round(parseFloat(productForm.price_naira.value) * 100),
-      image_url: productForm.image_url.value,
+      image_url: imageUrl,
       sizes: productForm.sizes.value.split(',').map((s) => s.trim()).filter(Boolean),
       stock_quantity: parseInt(productForm.stock_quantity.value, 10) || 0,
       is_active: productForm.is_active.checked,
     };
-    await fetch('/api/admin/products', {
+    const response = await adminFetch('/api/admin/products', {
       method: id ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
+    if (!response.ok) {
+      const failure = await response.json().catch(() => ({}));
+      alert(failure.error || 'The product could not be saved.');
+      saveButton.disabled = false;
+      saveButton.textContent = 'Save Product';
+      return;
+    }
     productForm.reset();
     productForm.id.value = '';
     document.getElementById('product-form-title').textContent = 'Add Product';
     loadProducts();
+    saveButton.disabled = false;
+    saveButton.textContent = 'Save Product';
   });
 
   // ---------------- ORDERS ----------------
@@ -153,9 +192,9 @@
       .map(
         (o) => `
       <tr>
-        <td>${o.reference}</td>
-        <td>${o.customer_name}<br><small>${o.customer_email}</small></td>
-        <td>${(o.items || []).map((i) => `${i.product_name}${i.size ? ' (' + i.size + ')' : ''} ×${i.quantity}`).join('<br>')}</td>
+        <td>${escapeHtml(o.reference)}</td>
+        <td>${escapeHtml(o.customer_name)}<br><small>${escapeHtml(o.customer_email)}</small></td>
+        <td>${(o.items || []).map((i) => `${escapeHtml(i.product_name)}${i.size ? ' (' + escapeHtml(i.size) + ')' : ''} ×${Number(i.quantity)}`).join('<br>')}</td>
         <td>${formatNaira(o.total_kobo)}</td>
         <td>
           <select data-id="${o.id}" class="order-status-select">
@@ -172,7 +211,7 @@
   orderList.addEventListener('change', (e) => {
     const select = e.target.closest('.order-status-select');
     if (!select) return;
-    fetch('/api/admin/orders', {
+    adminFetch('/api/admin/orders', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: select.dataset.id, status: select.value }),
@@ -191,8 +230,8 @@
       .map(
         (m) => `
       <tr class="${m.is_read ? '' : 'unread'}">
-        <td>${m.name || '—'}<br><small>${m.phone || ''}</small></td>
-        <td>${m.message}</td>
+        <td>${escapeHtml(m.name || '—')}<br><small>${escapeHtml(m.phone || '')}</small></td>
+        <td>${escapeHtml(m.message)}</td>
         <td>${new Date(m.created_at).toLocaleString()}</td>
         <td><button type="button" data-id="${m.id}" data-read="${!m.is_read}">${m.is_read ? 'Mark Unread' : 'Mark Read'}</button></td>
       </tr>`
@@ -202,7 +241,7 @@
   messageList.addEventListener('click', (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;
-    fetch('/api/admin/messages', {
+    adminFetch('/api/admin/messages', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: btn.dataset.id, is_read: btn.dataset.read === 'true' }),

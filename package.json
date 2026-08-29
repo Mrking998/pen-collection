@@ -2,11 +2,16 @@
   "name": "pen-collection-backend",
   "version": "1.0.0",
   "private": true,
-  "dependencies": {
-    "@vercel/postgres": "^0.10.0",
-    "resend": "^4.0.1"
-  },
+  "type": "module",
   "scripts": {
-    "doctor": "npx react-doctor@latest"
+    "build": "node scripts/build-public.mjs",
+    "dev": "pnpm build && wrangler dev --local",
+    "deploy:dry": "pnpm build && wrangler deploy --dry-run",
+    "types": "wrangler types"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "latest",
+    "typescript": "latest",
+    "wrangler": "latest"
   }
 }
